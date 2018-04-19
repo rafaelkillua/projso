@@ -10,61 +10,44 @@
 using namespace xeu_utils;
 using namespace std;
 
+void left_child(Command command, int pp[2]) {
+    
+    close(pp[0]);
+    dup2(pp[1], 1);
+    execvp(command.filename(), command.argv());
+
+}
+
+void right_child(Command command, int pp[2]) {
+
+    close(pp[1]);
+    dup2(pp[0], 0);
+    execvp(command.filename(), command.argv());
+
+}
+
 int process(const vector<Command>& commands) {
 
-    int i, pp[2];
-    pid_t pid = 0;
-    
+    int i, pp[2];    
     int n = commands.size();
 
-    for(i = 0; i < n; i++) {
-        
-        if(i == 0) {
-            pipe(pp);
-        }
+    pipe(pp);
 
-        pid = fork();
+    if (fork() == 0) {
 
-        if(pid == 0) { 
-            if(n > 1) {
-                
-                if(i == 0) {
-                
-                    close(1);
-                    close(pp[0]);
-                    dup2(pp[1], 1);
-                
-                } else if(i == n - 1) {
-                
-                    close(0);
-                    close(pp[1]);
-                    dup2(pp[0], 0);                
-                
-                } else {
+        left_child(commands[0], pp);
 
-                    close(1);
-                    close(pp[0]);
-                    dup2(pp[1], 1);
-
-                    pipe(pp);                
-
-                    close(0);
-                    close(pp[1]);
-                    dup2(pp[0], 0);                    
-                }
-            }
-
-            execvp(commands[i].filename(), commands[i].argv());    
-        } 
     }
 
-    if(pid != 0) {        
-        if(n > 1) {
-            close(pp[0]);
-            close(pp[1]);    
-        }
-        wait(0);
+    if (fork() == 0) {
+
+        right_child(commands[1], pp);
+
     }
+
+    close(pp[0]);
+    close(pp[1]);
+    wait(0);
 
     return 0;
 }
