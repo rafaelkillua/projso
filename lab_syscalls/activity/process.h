@@ -18,17 +18,15 @@ int process(const vector<Command>& commands) {
     int n = commands.size();
 
     for(i = 0; i < n; i++) {
-
         
-        if(n > 1 && i < n - 1) {
+        if(i == 0) {
             pipe(pp);
         }
 
         pid = fork();
 
-        if(n > 1) {
-
-            if(pid == 0) { 
+        if(pid == 0) { 
+            if(n > 1) {
                 
                 if(i == 0) {
                 
@@ -44,20 +42,27 @@ int process(const vector<Command>& commands) {
                 
                 } else {
 
-                    close(0);
-                    dup2(pp[0], 0);                
-
                     close(1);
+                    close(pp[0]);
                     dup2(pp[1], 1);
+
+                    pipe(pp);                
+
+                    close(0);
+                    close(pp[1]);
+                    dup2(pp[0], 0);                    
                 }
-        }
+            }
+
             execvp(commands[i].filename(), commands[i].argv());    
         } 
     }
 
     if(pid != 0) {        
-        close(pp[0]);
-        close(pp[1]);    
+        if(n > 1) {
+            close(pp[0]);
+            close(pp[1]);    
+        }
         wait(0);
     }
 
