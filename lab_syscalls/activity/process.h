@@ -12,23 +12,53 @@ using namespace std;
 
 int process(const vector<Command>& commands) {
 
-    pid_t p = 0;
-    int i;
+    int i, pp[2];
+    pid_t pid = 0;
+    
+    int n = commands.size();
 
-    for(i = 0; i < commands.size(); i++) {
+    for(i = 0; i < n; i++) {
 
-        p = fork();
-
-        if(p == 0) {
-            cout << "eu sou filho " << i << commands[i].args()[0] << endl;
-            execvp(commands[i].filename(), commands[i].argv());
         
+        if(n > 1 && i < n - 1) {
+            pipe(pp);
+        }
+
+        pid = fork();
+
+        if(n > 1) {
+
+            if(pid == 0) { 
+                
+                if(i == 0) {
+                
+                    close(1);
+                    close(pp[0]);
+                    dup2(pp[1], 1);
+                
+                } else if(i == n - 1) {
+                
+                    close(0);
+                    close(pp[1]);
+                    dup2(pp[0], 0);                
+                
+                } else {
+
+                    close(0);
+                    dup2(pp[0], 0);                
+
+                    close(1);
+                    dup2(pp[1], 1);
+                }
+        }
+            execvp(commands[i].filename(), commands[i].argv());    
         } 
     }
 
-    if(p != 0) {
+    if(pid != 0) {        
+        close(pp[0]);
+        close(pp[1]);    
         wait(0);
-        cout << "voltando pro terminal after " << i << endl;
     }
 
     return 0;
