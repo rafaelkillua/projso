@@ -10,43 +10,53 @@
 using namespace xeu_utils;
 using namespace std;
 
-void left_child(Command command, int pp[2]) {
+void left_child(int pp[2], int j) {
     
     close(pp[0]);
+    dup2(j, 0);
     dup2(pp[1], 1);
-    execvp(command.filename(), command.argv());
 
 }
 
-void right_child(Command command, int pp[2]) {
+int right_child(int pp[2]) {
 
-    close(pp[1]);
+    //close(pp[1]);
     dup2(pp[0], 0);
-    execvp(command.filename(), command.argv());
-
+    dup2(pp[1], 1);
+    return dup(pp[1]);
 }
 
 int process(const vector<Command>& commands) {
 
-    int i, pp[2];    
+    int i, j = 0, pp[2];
     int n = commands.size();
+    
+    for(i = 0; i < n - 1; i = i + 2) {
 
-    pipe(pp);
+        pipe(pp);
+        pp[0] = j;
 
-    if (fork() == 0) {
+        if (fork() == 0) {
 
-        left_child(commands[0], pp);
+            left_child(pp, j);
+            execvp(commands[i].filename(), commands[i].argv());
 
-    }
+        }
 
-    if (fork() == 0) {
+        if (n - i >= 2 && fork() == 0) {
 
-        right_child(commands[1], pp);
+            j = right_child(pp);
+            cout << "UÉ meio " << j << endl;
+            execvp(commands[i + 1].filename(), commands[i + 1].argv());
+
+        }
 
     }
 
     close(pp[0]);
     close(pp[1]);
+    cout << "UE final " << j << endl;
+    dup2(1, j);
     wait(0);
 
     return 0;
