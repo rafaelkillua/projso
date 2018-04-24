@@ -1,5 +1,11 @@
+DEBUG_MODE ?= 0
+
 xeu: *.cpp xeu-utils
+ifeq ($(DEBUG_MODE), 1)
+	g++ *.cpp *.o -o xeu -DDEBUG_MODE
+else
 	g++ *.cpp *.o -o xeu
+endif
 	rm -f *.o
 
 test: xeu-utils-tests xeu_utils/__tests__/__lib__/main.cpp
