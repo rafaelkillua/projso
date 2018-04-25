@@ -1,5 +1,5 @@
 #include "xeu_utils/StreamParser.h"
-#include "activity/process.h"
+#include "activity/process.cpp"
 
 #include <iostream>
 #include <vector>
