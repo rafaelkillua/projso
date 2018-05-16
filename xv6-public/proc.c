@@ -7,6 +7,10 @@
 #include "proc.h"
 #include "spinlock.h"
 
+// Added
+#include <time.h>
+#include <stdlib.h>
+
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
@@ -325,6 +329,8 @@ scheduler(void)
   struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
+
+  srand(time(NULL));
   
   for(;;){
     // Enable interrupts on this processor.
@@ -332,8 +338,16 @@ scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
+
+    int random = rand() % 100;
+    int priority = -1;
+    if (random < 50) priority = 0;
+    else if (random < 75) priority = 1;
+    else if (random < 90) priority = 2;
+    else priority = 3;
+
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE)
+      if(p->state != RUNNABLE || p->priority != priority)
         continue;
 
       // Switch to chosen process.  It is the process's job
