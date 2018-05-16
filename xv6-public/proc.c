@@ -8,8 +8,8 @@
 #include "spinlock.h"
 
 // Added
-#include <time.h>
-#include <stdlib.h>
+// #include <time.h>
+// #include <stdlib.h>
 
 struct {
   struct spinlock lock;
@@ -92,6 +92,7 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+  p->priority = 3;
 
   release(&ptable.lock);
 
@@ -299,6 +300,7 @@ wait(void)
         p->name[0] = 0;
         p->killed = 0;
         p->state = UNUSED;
+        p->priority = 0;
         release(&ptable.lock);
         return pid;
       }
@@ -330,8 +332,6 @@ scheduler(void)
   struct cpu *c = mycpu();
   c->proc = 0;
 
-  srand(time(NULL));
-  
   for(;;){
     // Enable interrupts on this processor.
     sti();
@@ -339,11 +339,11 @@ scheduler(void)
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
 
-    int random = rand() % 100;
+    int rd = random(100);
     int priority = -1;
-    if (random < 50) priority = 0;
-    else if (random < 75) priority = 1;
-    else if (random < 90) priority = 2;
+    if (rd < 50) priority = 0;
+    else if (rd < 75) priority = 1;
+    else if (rd < 90) priority = 2;
     else priority = 3;
 
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
@@ -545,4 +545,77 @@ procdump(void)
     }
     cprintf("\n");
   }
+}
+
+// Change Process priority
+int
+setpriority(int pid, int priority)
+{
+  struct proc *p;
+
+  acquire(&ptable.lock);
+
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  {
+    if(p->pid == pid)
+    {
+        p->priority = priority;
+        break;
+    }
+  }
+
+  release(&ptable.lock);
+
+  return pid;
+}
+
+// Get Process priority
+int
+getpriority(int pid)
+{
+  struct proc *p;
+
+  acquire(&ptable.lock);
+
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->pid == pid) {
+        break;
+    }
+  }
+  
+  release(&ptable.lock);
+
+  return p->priority;
+}
+
+int
+random(int max) {
+
+  if(max <= 0) {
+    return 1;
+  }
+
+  static int z1 = 12345; // 12345 for rest of zx
+  static int z2 = 12345; // 12345 for rest of zx
+  static int z3 = 12345; // 12345 for rest of zx
+  static int z4 = 12345; // 12345 for rest of zx
+
+  int b;
+  b = (((z1 << 6) ^ z1) >> 13);
+  z1 = (((z1 & 4294967294) << 18) ^ b);
+  b = (((z2 << 2) ^ z2) >> 27);
+  z2 = (((z2 & 4294967288) << 2) ^ b);
+  b = (((z3 << 13) ^ z3) >> 21);
+  z3 = (((z3 & 4294967280) << 7) ^ b);
+  b = (((z4 << 3) ^ z4) >> 12);
+  z4 = (((z4 & 4294967168) << 13) ^ b);
+
+  // if we have an argument, then we can use it
+  int rand = ((z1 ^ z2 ^ z3 ^ z4)) % max;
+
+  if(rand < 0) {
+    rand = rand * -1;
+  }
+
+  return rand;
 }
