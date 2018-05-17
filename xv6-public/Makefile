@@ -176,6 +176,7 @@ UPROGS=\
 	_zombie\
 	_nice\
 	_ps\
+	_workload\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)

@@ -7,6 +7,8 @@
 #include "proc.h"
 #include "spinlock.h"
 #include "ps.h"
+#include "date.h"
+// #include "trap.c"
 
 struct {
   struct spinlock lock;
@@ -111,6 +113,8 @@ found:
   p->context = (struct context*)sp;
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
+
+  proclog("ALLOCATION", p->name, p->pid, p->priority);
 
   return p;
 }
@@ -259,6 +263,8 @@ exit(void)
       if(p->state == ZOMBIE)
         wakeup1(initproc);
     }
+  proclog("EXIT", p->name, p->pid, p->priority);
+
   }
 
   // Jump into the scheduler, never to return.
@@ -273,8 +279,9 @@ int
 wait(void)
 {
   struct proc *p;
-  int havekids, pid;
+  int havekids, pid, priority;
   struct proc *curproc = myproc();
+  char name[16];
   
   acquire(&ptable.lock);
   for(;;){
@@ -286,7 +293,11 @@ wait(void)
       havekids = 1;
       if(p->state == ZOMBIE){
         // Found one.
+
         pid = p->pid;
+        priority = p->priority;
+        strncpy(name, p->name, strlen(p->name));
+
         kfree(p->kstack);
         p->kstack = 0;
         freevm(p->pgdir);
@@ -297,6 +308,8 @@ wait(void)
         p->state = UNUSED;
         p->priority = 0;
         release(&ptable.lock);
+
+        proclog("WAIT", name, pid, priority);
         return pid;
       }
     }
@@ -323,15 +336,6 @@ wait(void)
 void
 scheduler(void)
 {
-  static char *states[] = {
-  [UNUSED]    "unused",
-  [EMBRYO]    "embryo",
-  [SLEEPING]  "sleep ",
-  [RUNNABLE]  "runble",
-  [RUNNING]   "run   ",
-  [ZOMBIE]    "zombie"
-  };
-
   struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
@@ -360,7 +364,8 @@ scheduler(void)
       c->proc = p;
       switchuvm(p);
       p->state = RUNNING;
-      cprintf("\nSCHEDULER EVENT %d %s %d %s\n", p->pid, states[p->state], p->priority, p->name);
+      
+      proclog("SCHEDULER", p->name, p->pid, p->priority);
 
       swtch(&(c->scheduler), p->context);
       switchkvm();
@@ -666,4 +671,16 @@ getprocs(int max, struct uproc* table){
 	release(&ptable.lock);	
 
 	return i;
+}
+
+void
+proclog(char type[16], char name[16], int pid, int priority)
+{
+  struct rtcdate date;
+  if (pid != 0)
+  {
+    cmostime(&date);
+    cprintf("\n%d/%d/%d %d:%d:%d - ", date.day, date.month, date.year, date.hour, date.minute, date.second);
+    cprintf("%s EVENT - %d %d %s\n", type, pid, priority, name);
+  }
 }

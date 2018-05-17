@@ -125,6 +125,7 @@ int             setpriority(int, int);
 int             getpriority(int);
 int             random(int);
 int             getprocs(int, struct uproc*);
+void            proclog(char type[16], char name[16], int pid, int priority);
 
 // swtch.S
 void            swtch(struct context**, struct context*);
