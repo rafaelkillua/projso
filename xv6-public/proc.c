@@ -8,7 +8,6 @@
 #include "spinlock.h"
 #include "ps.h"
 #include "date.h"
-// #include "trap.c"
 
 struct {
   struct spinlock lock;
@@ -113,8 +112,6 @@ found:
   p->context = (struct context*)sp;
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
-
-  proclog("ALLOCATION", p->name, p->pid, p->priority);
 
   return p;
 }
@@ -263,8 +260,6 @@ exit(void)
       if(p->state == ZOMBIE)
         wakeup1(initproc);
     }
-  proclog("EXIT", p->name, p->pid, p->priority);
-
   }
 
   // Jump into the scheduler, never to return.
@@ -279,9 +274,8 @@ int
 wait(void)
 {
   struct proc *p;
-  int havekids, pid, priority;
+  int havekids, pid;
   struct proc *curproc = myproc();
-  char name[16];
   
   acquire(&ptable.lock);
   for(;;){
@@ -295,9 +289,6 @@ wait(void)
         // Found one.
 
         pid = p->pid;
-        priority = p->priority;
-        strncpy(name, p->name, strlen(p->name));
-
         kfree(p->kstack);
         p->kstack = 0;
         freevm(p->pgdir);
@@ -309,7 +300,6 @@ wait(void)
         p->priority = 0;
         release(&ptable.lock);
 
-        proclog("WAIT", name, pid, priority);
         return pid;
       }
     }
@@ -336,9 +326,10 @@ wait(void)
 void
 scheduler(void)
 {
-  struct proc *p;
+  struct proc *p,*p2;
   struct cpu *c = mycpu();
   c->proc = 0;
+  int i = 0;
 
   for(;;){
     // Enable interrupts on this processor.
@@ -347,15 +338,30 @@ scheduler(void)
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
 
-    int rd = random(100);
-    int priority = -1;
-    if (rd < 10) priority = 0;
-    else if (rd < 25) priority = 1;
-    else if (rd < 50) priority = 2;
-    else priority = 3;
+    int priority, rd, flag = 1;
+
+    while(flag){
+
+        rd = random(100);
+        priority = -1;
+        if (rd < 10) priority = 0;
+        else if (rd < 25) priority = 1;
+        else if (rd < 50) priority = 2;
+        else priority = 3;
+        
+        for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+          if(p->priority == priority) {
+            flag = 0;  
+            break;
+          }
+        }
+    }
 
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE || p->priority != priority)
+      if(p->state != RUNNABLE)
+        continue;
+      
+      if(p->priority != priority)
         continue;
 
       // Switch to chosen process.  It is the process's job
@@ -364,8 +370,20 @@ scheduler(void)
       c->proc = p;
       switchuvm(p);
       p->state = RUNNING;
-      
-      proclog("SCHEDULER", p->name, p->pid, p->priority);
+
+      if(i++ == 20)
+      {
+        cprintf("\nSCHEDULER EVENT VALUE IS %d AND PRIORITY IS %d\n", rd, priority);
+        proclog("SCHEDULER PROCESS", p->name, p->pid, p->priority);
+        cprintf("\nSCHEDULER EVENT PROCESS TABLE\n");
+        for (p2 = ptable.proc; p2 < &ptable.proc[NPROC]; p2++){
+          if(p2->state == UNUSED)
+            continue;
+          
+          proclog("SCHEDULER", p2->name, p2->pid, p2->priority);
+        }
+        i = 0;
+      }
 
       swtch(&(c->scheduler), p->context);
       switchkvm();
@@ -373,9 +391,25 @@ scheduler(void)
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       c->proc = 0;
+      
+        while(flag && p != &ptable.proc[NPROC]){
+
+          rd = random(100);
+          priority = -1;
+          if (rd < 10) priority = 0;
+          else if (rd < 25) priority = 1;
+          else if (rd < 50) priority = 2;
+          else priority = 3;
+          
+          for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+            if(p->priority == priority) {
+              flag = 0;  
+              break;
+            }
+          }
+      }
     }
     release(&ptable.lock);
-
   }
 }
 
