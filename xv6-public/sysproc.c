@@ -6,6 +6,7 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
+#include "ps.h"
 
 int
 sys_fork(void)
@@ -116,4 +117,19 @@ sys_getpriority(void)
     return -1;
 
   return getpriority(pid);
+}
+
+int
+sys_getprocs(void)
+{
+	
+	struct uproc * tmp;
+	int size;
+	
+	if (argint(0, &size) < 0 || argptr(1, (void*)&tmp, sizeof(*tmp)) < 0)
+  {
+		return -1;
+	}
+	
+	return getprocs(size, tmp);
 }

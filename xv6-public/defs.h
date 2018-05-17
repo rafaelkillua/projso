@@ -9,6 +9,7 @@ struct spinlock;
 struct sleeplock;
 struct stat;
 struct superblock;
+struct uproc;
 
 // bio.c
 void            binit(void);
@@ -123,6 +124,7 @@ void            yield(void);
 int             setpriority(int, int);
 int             getpriority(int);
 int             random(int);
+int             getprocs(int, struct uproc*);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

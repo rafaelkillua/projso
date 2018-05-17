@@ -7,22 +7,27 @@ int main(int argc, char *argv[])
 {
     int value, pid;
 
-    if (argc < 2)
+    if (argc < 2 || argc > 3)
     {
-        printf(2, "Usage: nice [pid] [priority]\n" );
+        printf(2, "Usage: nice [pid] # To get process priority.\n       nice [pid] [priority] # To set process priority.\n" );
         exit();
     }
 
     pid = atoi(argv[1]);
-    value = atoi(argv[2]);
 
-    if (value < 1 || value > 4)
+    if (argc == 3)
     {
-        printf(2, "Invalid priority (1-4)!\n" );
-        exit();
-    }
+        value = atoi(argv[2]);
 
-    setpriority(pid, value - 1);
+        if (value < 0 || value > 3)
+        {
+            printf(2, "Invalid priority (0-3)! # 0 is the highest priority\n" );
+            exit();
+        }
+
+        setpriority(pid, value);
+
+    } else printf(1, "%d\n", getpriority(pid));
 
     exit();
 }

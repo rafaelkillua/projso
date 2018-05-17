@@ -6,6 +6,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "ps.h"
 
 struct {
   struct spinlock lock;
@@ -87,7 +88,6 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
-  p->priority = 3;
 
   release(&ptable.lock);
 
@@ -124,7 +124,7 @@ userinit(void)
   extern char _binary_initcode_start[], _binary_initcode_size[];
 
   p = allocproc();
-  
+  p->priority = 3;
   initproc = p;
   if((p->pgdir = setupkvm()) == 0)
     panic("userinit: out of memory?");
@@ -345,9 +345,9 @@ scheduler(void)
 
     int rd = random(100);
     int priority = -1;
-    if (rd < 50) priority = 0;
-    else if (rd < 75) priority = 1;
-    else if (rd < 90) priority = 2;
+    if (rd < 10) priority = 0;
+    else if (rd < 25) priority = 1;
+    else if (rd < 50) priority = 2;
     else priority = 3;
 
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
@@ -623,4 +623,47 @@ random(int max) {
   }
 
   return rand;
+}
+
+int 
+getprocs(int max, struct uproc* table){
+
+	struct proc *p;
+	int i;
+
+	acquire(&ptable.lock);
+	
+	//loop through table and fill in uproc table
+	for(i=0, p = ptable.proc; p < &ptable.proc[NPROC] && i < max; p++)
+  {
+		if(p->state != UNUSED)
+    {
+			table[i].pid = p->pid;
+      table[i].priority = p->priority;
+			table[i].ppid = p->parent!=0 ? p->parent->pid : 0;
+			safestrcpy(table[i].name, p->name, sizeof(p->name));
+			
+			switch(p->state){
+				case UNUSED:
+					break;
+				case EMBRYO:
+					safestrcpy(table[i].state, "EMBRYO", sizeof("EMBRYO")); break;
+				case SLEEPING:
+					safestrcpy(table[i].state, "SLEEPING", sizeof("SLEEPING"));  break;
+				case RUNNABLE:
+					safestrcpy(table[i].state, "RUNNABLE", sizeof("RUNNABLE")); break;
+				case RUNNING:
+					safestrcpy(table[i].state, "RUNNING", sizeof("RUNNING")); break;
+				case ZOMBIE:
+					safestrcpy(table[i].state, "ZOMBIE", sizeof("ZOMBIE")); break;
+			}
+			
+			i++;
+
+		}
+  }
+
+	release(&ptable.lock);	
+
+	return i;
 }
