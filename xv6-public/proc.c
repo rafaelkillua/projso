@@ -7,17 +7,12 @@
 #include "proc.h"
 #include "spinlock.h"
 
-// Added
-// #include <time.h>
-// #include <stdlib.h>
-
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
 } ptable;
 
 static struct proc *initproc;
-
 int nextpid = 1;
 extern void forkret(void);
 extern void trapret(void);
@@ -328,6 +323,15 @@ wait(void)
 void
 scheduler(void)
 {
+  static char *states[] = {
+  [UNUSED]    "unused",
+  [EMBRYO]    "embryo",
+  [SLEEPING]  "sleep ",
+  [RUNNABLE]  "runble",
+  [RUNNING]   "run   ",
+  [ZOMBIE]    "zombie"
+  };
+
   struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
@@ -356,6 +360,7 @@ scheduler(void)
       c->proc = p;
       switchuvm(p);
       p->state = RUNNING;
+      cprintf("\nSCHEDULER EVENT %d %s %d %s\n", p->pid, states[p->state], p->priority, p->name);
 
       swtch(&(c->scheduler), p->context);
       switchkvm();
