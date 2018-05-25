@@ -1,31 +1,6 @@
 from sys import stderr
-
-class Process(object):
-    def __init__(self, timestamp, pid, priority, service_t):
-        #FIXME: add usage time to be updated by the engine
-        self.timestamp = timestamp
-        self.pid = pid
-        self.priority = priority
-        self.service_t = service_t
-
-    def get_timestamp(self):
-        return self.timestamp
-
-    def get_pid(self):
-        return self.pid
-
-    def get_priority(self):
-        return self.priority
-
-    def get_service_t(self):
-        return self.service_t
-
-    def remaining_service_time(self):
-        pass
-
-    def __repr__(self):
-        return str(self.__dict__)
-
+import lottery_scheduler as sched
+from process import Process
 
 class WorkloadParser(object):
     def parse(self, filename):
@@ -41,6 +16,8 @@ class WorkloadParser(object):
             proc_list.append(Process(timestamp, pid, priority, service_t))
         return proc_list
 
+scheduler = sched.LotteryScheduler()
+
 def now():
     #to be implemented - engine method
     """Return the current logical timestamp"""
@@ -49,7 +26,7 @@ def now():
 def alloc_proc(process):
     #plugin method
     """Update the data structures to recognize a new process was created"""
-    pass
+    scheduler.alloc_process(process)
 
 def schedule(out_process_pid):
     #plugin method
@@ -59,7 +36,7 @@ def schedule(out_process_pid):
                 in case there was no process running. The engine is responsible
                 for updating the usage time.
     """
-    pass
+    return scheduler.scheduler(out_process_pid)
 
 ordered_process_list = []
 
