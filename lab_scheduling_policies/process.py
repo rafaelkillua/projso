@@ -1,10 +1,10 @@
 class Process(object):
     def __init__(self, timestamp, pid, priority, service_t):
-        #FIXME: add usage time to be updated by the engine
         self.timestamp = timestamp
         self.pid = pid
         self.priority = priority
         self.service_t = service_t
+        self.usage_t = 0
 
     def get_timestamp(self):
         return self.timestamp
@@ -18,8 +18,11 @@ class Process(object):
     def get_service_t(self):
         return self.service_t
 
-    def remaining_service_time(self):
-        pass
+    def set_usage_t(self, usage):
+        self.usage_t = usage
+
+    def get_usage_t(self):
+        return self.usage_t
 
     def __repr__(self):
         return str(self.__dict__)
