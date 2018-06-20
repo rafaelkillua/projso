@@ -91,7 +91,6 @@ class Xv6PriorityRandom(PriorityRandom):
 		if len(self._process_list) == 0: 
 			return None
 
-		print "SOU BUGADO!!!"
 		if self._last_index >= len(self._process_list):
 			self._last_index = 0
 		

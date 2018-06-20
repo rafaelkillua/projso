@@ -164,8 +164,14 @@ def generate_output(out):
                 timeline_lines.append(str(pid) + ' expected '  + str(proc.get_creation_t()) + ' ' + str(expect_exit_t) + '\n'
                     + str(pid) + ' real ' + str(expect_exit_t) + ' ' + str(proc.get_exit_t()) + '\n')
 
-            timeline_out_file.writelines(timeline_lines)
-            extra_time_file.writelines(extra_time_lines)
+            print timeline_lines
+            
+            for line in timeline_lines:
+                timeline_out_file.writelines(line)
+
+            for line in extra_time_lines:
+                extra_time_file.writelines(line)
+
     except Exception as e:
         print 'Unable to write file property: %s.' % str(e)
 
