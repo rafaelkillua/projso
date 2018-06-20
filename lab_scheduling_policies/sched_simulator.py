@@ -2,6 +2,7 @@ import sys
 from sys import stderr
 from process import Process
 from sched_policy import Scheduler
+from priority_random import *
 from sim_engine import Event
 from sim_engine import EventStream
 import uuid
@@ -62,7 +63,9 @@ def run_simulation(event_stream):
 
     #init main loop
     cpu = CPU()
-    scheduler = Scheduler()
+    # scheduler = Scheduler()
+    # scheduler = PriorityRandom()
+    scheduler = Xv6PriorityRandom()
     p_table = ProcTable()
 
     #procs seen during simulation, to generate output
@@ -105,6 +108,7 @@ def run_simulation(event_stream):
             new_proc.set_creation_t(Clock.now())
 
             p_table.add(new_proc)
+            print "ALLOC"
             scheduler.alloc_proc(new_proc, Clock.now() - previous_t)
             procs.append(new_proc)
 

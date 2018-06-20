@@ -1,6 +1,6 @@
 # library
 library(timelineS)
-
+setwd("~/Documents/workspace/projso/lab_scheduling_policies")
 # Generate timeline plot.
 # This plot shows the progress of each process over the time.
 # The history of a process is divided in two moments: expected time and extra time.

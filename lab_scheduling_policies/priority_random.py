@@ -1,27 +1,28 @@
 from random import randint
 from process import Process
-from sched_policy import Scheduler
 
-class PriorityRandom(Scheduler):
+class PriorityRandom():
 	"""Implements xv6 scheduler without bugs"""
 
 	def __init__(self):
-		Scheduler.__init__(self)
 		self._process_list = []
 		self._last_index = 0
 
-	def alloc_proc(self, process):
+	def alloc_proc(self, process, delta_t):
 		"""Update the data structures to recognize a new process was created"""
 		self._process_list.append(process)
 
 
-	def schedule(self, pid):
+	def schedule(self, pid, delta_t):
 		"""Return the next process to run in the cpu.
 
 		out_process_pid -- the pid of the process that just left the cpu, or None
 		in case there was no process running. The engine is responsible
 		for updating the usage time.
 		"""
+		if len(self._process_list) == 0:
+			return None
+
 		if self._last_index >= len(self._process_list):
 			self._last_index = 0
 		
@@ -79,13 +80,17 @@ class Xv6PriorityRandom(PriorityRandom):
 	def __init__(self):
 		PriorityRandom.__init__(self)
 
-	def schedule(self, pid):
+	def schedule(self, pid, delta_t):
 		"""Return the next process to run in the cpu.
 
 		out_process_pid -- the pid of the process that just left the cpu, or None
 		in case there was no process running. The engine is responsible
 		for updating the usage time.
 		"""
+
+		if len(self._process_list) == 0: 
+			return None
+
 		print "SOU BUGADO!!!"
 		if self._last_index >= len(self._process_list):
 			self._last_index = 0
