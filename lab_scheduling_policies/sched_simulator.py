@@ -66,6 +66,7 @@ def run_simulation(event_stream):
     # scheduler = Scheduler()
     # scheduler = PriorityRandom()
     scheduler = Xv6PriorityRandom()
+    # scheduler = RoudRobin()
     p_table = ProcTable()
 
     #procs seen during simulation, to generate output
@@ -149,6 +150,7 @@ SLICE_DURATION = 20
 
 def generate_output(out):
     # Generate output file.
+    aux = PriorityRandom()
     try:
         with open('timeline-output.ffd', 'w') as timeline_out_file, open('extra-time-output.ffd', 'w') as extra_time_file:
             timeline_lines = []
@@ -156,15 +158,13 @@ def generate_output(out):
             timeline_lines.append('process service start_t end_t\n')
 
             for proc in out:
+                print "Priority ", proc.get_priority(), aux._find_priority(proc.get_priority())
                 expect_exit_t = proc.get_creation_t() + proc.get_service_t()
                 extra_t = proc.get_exit_t() - expect_exit_t
-
-                extra_time_lines.append(str(extra_t) + '\n')
+                extra_time_lines.append(str(extra_t) + " " + str(aux._find_priority(proc.get_priority())) +'\n')
                 pid = proc.get_pid()
                 timeline_lines.append(str(pid) + ' expected '  + str(proc.get_creation_t()) + ' ' + str(expect_exit_t) + '\n'
                     + str(pid) + ' real ' + str(expect_exit_t) + ' ' + str(proc.get_exit_t()) + '\n')
-
-            print timeline_lines
             
             for line in timeline_lines:
                 timeline_out_file.writelines(line)

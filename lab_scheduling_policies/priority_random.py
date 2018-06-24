@@ -29,11 +29,10 @@ class PriorityRandom():
 		while True:
 
 			priority = self._select_priority()
-			print "SCHEDULING PRIORITY ", priority, "\n"
+			# print "SCHEDULING PRIORITY ", priority, "\n"
 			actual_index = self._last_index + 1
 
 			while True:
-				print "FIND PROCESS " , actual_index, "\n"
 				
 				if actual_index >= len(self._process_list):
 					actual_index = 0
@@ -42,6 +41,7 @@ class PriorityRandom():
 				
 				if self._find_priority(process.get_priority()) == priority:
 					self._last_index = self._process_list.index(process)
+					# print "FIND PROCESS " , actual_index, "\n"
 					return process
 								
 				else:
@@ -50,17 +50,17 @@ class PriorityRandom():
 					if actual_index >= len(self._process_list):
 						actual_index = 0
 
-					print "LAST INDEX: ", self._last_index, " ACTUAL INDEX: ", actual_index					
+					# print "LAST INDEX: ", self._last_index, " ACTUAL INDEX: ", actual_index					
 
 					if actual_index == self._last_index: 
 						break
 
 	def _find_priority(self, value):
 
-		if value <= 10: return 3
-		elif value <= 20: return 2
-		elif value <= 30: return 1
-		else: return 0
+		if value <= 5: return 0
+		elif value <= 10: return 1
+		elif value <= 15: return 2
+		else: return 3
 
 	def _select_priority(self):
 		
@@ -97,11 +97,11 @@ class Xv6PriorityRandom(PriorityRandom):
 		while True:
 
 			priority = self._select_priority()
-			print "SCHEDULING PRIORITY ", priority, "\n"
+			# print "SCHEDULING PRIORITY ", priority, "\n"
 			actual_index = self._last_index + 1
 
 			while True:
-				print "FIND PROCESS " , actual_index, "\n"
+				# print "FIND PROCESS " , actual_index, "\n"
 				
 				if actual_index >= len(self._process_list):
 					actual_index = 0
@@ -119,10 +119,28 @@ class Xv6PriorityRandom(PriorityRandom):
 						actual_index = 0
 						priority = self._select_priority()
 
-					print "LAST INDEX: ", self._last_index, " ACTUAL INDEX: ", actual_index					
+					# print "LAST INDEX: ", self._last_index, " ACTUAL INDEX: ", actual_index					
 
 					if actual_index == self._last_index: 
 						break
+
+class RoudRobin(PriorityRandom):
+
+	def __init__(self):
+		PriorityRandom.__init__(self)
+
+	def schedule(self, pid, delta_t):
+		
+		size = len(self._process_list)
+
+		if size == 0: 
+			return None
+
+		process = self._process_list[self._last_index % size]
+		self._last_index = self._last_index + 1
+		return process
+
+
 
 if __name__ == '__main__':
 

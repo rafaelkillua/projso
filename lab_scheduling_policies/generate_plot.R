@@ -16,8 +16,12 @@ dev.off()
 # Generate boxplot.
 # BoxPlot about the extra time needed by the processes.
 
-extra_time_data = read.csv("extra-time-output.ffd", header = F)
+extra_time_data = read.table("extra-time-output.ffd", header = F)
 
 png(filename = "extra_time_plot.png", width = 600, height = 600, units = "px",res = 120)
-boxplot(x = extra_time_data, ylab = "Extra processing time")
+boxplot(x = extra_time_data$V1, ylab = "Extra processing time")
+dev.off()
+
+png(filename = "test_plot.png", width = 600, height = 600, units = "px",res = 120)
+ggplot2::ggplot(data = extra_time_data, ggplot2::aes(y = extra_time_data$V1, x = extra_time_data$V2, group = extra_time_data$V2)) + ggplot2::geom_boxplot()
 dev.off()
