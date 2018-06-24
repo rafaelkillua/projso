@@ -6,6 +6,8 @@ from priority_random import *
 from sim_engine import Event
 from sim_engine import EventStream
 import uuid
+from datetime import datetime
+
 
 class WorkloadParser(object):
     def parse(self, filename):
@@ -65,8 +67,8 @@ def run_simulation(event_stream):
     cpu = CPU()
     # scheduler = Scheduler()
     # scheduler = PriorityRandom()
-    scheduler = Xv6PriorityRandom()
-    # scheduler = RoudRobin()
+    # scheduler = Xv6PriorityRandom()
+    scheduler = RoudRobin()
     p_table = ProcTable()
 
     #procs seen during simulation, to generate output
@@ -151,8 +153,10 @@ SLICE_DURATION = 20
 def generate_output(out):
     # Generate output file.
     aux = PriorityRandom()
+    output = "out/" + str(datetime.now().utcnow()) + 'extra-time-output.ffd'
+    timeline_out = "time/" + str(datetime.now().utcnow()) + 'timeline-output.ffd'
     try:
-        with open('timeline-output.ffd', 'w') as timeline_out_file, open('extra-time-output.ffd', 'w') as extra_time_file:
+        with open(timeline_out, 'w') as timeline_out_file, open(output, 'w') as extra_time_file:
             timeline_lines = []
             extra_time_lines = []
             timeline_lines.append('process service start_t end_t\n')
