@@ -7,6 +7,7 @@ from sim_engine import Event
 from sim_engine import EventStream
 import uuid
 from datetime import datetime
+import ConfigParser
 
 
 class WorkloadParser(object):
@@ -65,10 +66,7 @@ def run_simulation(event_stream):
 
     #init main loop
     cpu = CPU()
-    # scheduler = Scheduler()
-    # scheduler = PriorityRandom()
-    # scheduler = Xv6PriorityRandom()
-    scheduler = RoudRobin()
+    scheduler = select_scheduler()
     p_table = ProcTable()
 
     #procs seen during simulation, to generate output
@@ -153,10 +151,15 @@ SLICE_DURATION = 20
 def generate_output(out):
     # Generate output file.
     aux = PriorityRandom()
-    output = "out/" + str(datetime.now().utcnow()) + 'extra-time-output.ffd'
-    timeline_out = "time/" + str(datetime.now().utcnow()) + 'timeline-output.ffd'
+
+    configParser = ConfigParser.RawConfigParser()
+    path = "sim.conf"
+    configParser.read(path)
+    extra_time_output = configParser.get("extra_time", "path")
+    timeline_output = configParser.get("timeline", "path")
+
     try:
-        with open(timeline_out, 'w') as timeline_out_file, open(output, 'w') as extra_time_file:
+        with open(timeline_output, 'w') as timeline_out_file, open(extra_time_output, 'w') as extra_time_file:
             timeline_lines = []
             extra_time_lines = []
             timeline_lines.append('process service start_t end_t\n')
@@ -178,6 +181,22 @@ def generate_output(out):
 
     except Exception as e:
         print 'Unable to write file property: %s.' % str(e)
+
+def select_scheduler():
+
+    configParser = ConfigParser.RawConfigParser()
+    path = "sim.conf"
+    configParser.read(path)
+    algorithm = configParser.get("scheduler", "algorithm")
+
+    if algorithm == "RoundRobin":
+        return RoudRobin()
+    elif algorithm == "PriorityRandom":
+        return PriorityRandom()
+    elif algorithm == "Xv6PriorityRandom":
+        return Xv6PriorityRandom()
+    else:
+        return Scheduler()
 
 if __name__ == '__main__':
     #read workload file in the standard directory

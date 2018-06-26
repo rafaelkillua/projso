@@ -1,14 +1,21 @@
 from random import randint
+import ConfigParser
 
 def build_process_file():
-    f = open('workload_file.ffd', 'w')
+
+    configParser = ConfigParser.RawConfigParser()
+    path = "sim.conf"
+    configParser.read(path)
+    output = configParser.get("workload", "path")
+    
+    f = open(output, 'w')
     proc_list = []
     timestamp_c = 1
     pid_c = 1
 
     for i in xrange(30):
         priority = randint(1, 20)
-        service_time = randint(40, 400)
+        service_time = 40
         proc_list.append(
             str(timestamp_c) + ' ' +
             str(pid_c) + ' ' +
