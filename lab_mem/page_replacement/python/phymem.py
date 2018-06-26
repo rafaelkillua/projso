@@ -78,8 +78,7 @@ class NRU:
 
   def evict(self):
     # Get all frames in lower classes and random to select one of them
-    lowest_class = self._get_lowest_class()
-    frames = self._get_all_from_class(lowest_class)
+    frames = self._get_all_from_class(self._get_lowest_class())
     random_index = randint(0, len(frames) - 1)
     self.allocatedFrames.pop(frames[random_index])
     return frames[random_index]
@@ -96,11 +95,13 @@ class NRU:
       self.allocatedFrames[frameId][1] = 1
 
   def _get_class(self, frame):
+    # Get frame's class
     i = frame[0]
     i = i << 1
     return i + frame[1]
 
   def _get_lowest_class(self):
+    # Get lowest class on allocated frames, to know from which class remove the frame
     lowest = 4
     for value in self.allocatedFrames.values():
       actual = self._get_class(value)
@@ -109,6 +110,7 @@ class NRU:
     return lowest
 
   def _get_all_from_class(self, classNumber):
+    # Get all frames from given class
     frames = []
     bitR, bitM = 0, '{0:02b}'.format(classNumber)[1]
     if (classNumber > 1):
@@ -122,21 +124,28 @@ class NRU:
     print (self.allocatedFrames)
 
 class AGING:
-  # TODO
   def __init__(self):
-    self.allocatedFrames = []
+    self.allocatedFrames = {}
 
   def put(self, frameId):
-    pass
+    # Dict of frameId: counter
+    self.allocatedFrames[frameId] = 0
 
   def evict(self):
-    pass
+    # Get the frame with lowest counter
+    minFrame = min(self.allocatedFrames, key=self.allocatedFrames.get)
+    self.allocatedFrames.pop(minFrame)
+    return minFrame
 
   def clock(self):
-    pass
+    # When clock ticks, shift everybody to the right
+    for key, value in self.allocatedFrames.items():
+      self.allocatedFrames[key] = value >> 1
+
 
   def access(self, frameId, isWrite):
-    pass
+    # Add the reference bit (1) to the left of the counter. Doesn't care if isWrite
+    self.allocatedFrames[frameId] = 1 << (ALGORITHM_AGING_NBITS - 1) | self.allocatedFrames[frameId]
 
   def printMe(self):
     print (self.allocatedFrames)
@@ -172,9 +181,9 @@ class SECONDCHANCE:
 
 if __name__ == '__main__':
   #phy = PhysicalMemory("fifo")
-  phy = PhysicalMemory("nru")
+  #phy = PhysicalMemory("nru")
   #phy = PhysicalMemory("second-chance")
-  #phy = PhysicalMemory("aging")
+  phy = PhysicalMemory("aging")
   phy.put(1)
   phy.put(2)
   phy.put(3)
