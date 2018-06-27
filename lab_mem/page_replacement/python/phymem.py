@@ -73,7 +73,7 @@ class NRU:
     self.allocatedFrames = {}
 
   def put(self, frameId):
-    # Dict of frameId: (bitR, bitM)
+    # Dict of frameId: [bitR, bitM]
     self.allocatedFrames[frameId] = [0, 0]
 
   def evict(self):
@@ -128,24 +128,39 @@ class AGING:
     self.allocatedFrames = {}
 
   def put(self, frameId):
-    # Dict of frameId: counter
-    self.allocatedFrames[frameId] = 0
+    # Dict of frameId: [bitR, counter]
+    self.allocatedFrames[frameId] = [0, 0]
 
   def evict(self):
-    # Get the frame with lowest counter
-    minFrame = min(self.allocatedFrames, key=self.allocatedFrames.get)
-    self.allocatedFrames.pop(minFrame)
-    return minFrame
+    # Get the frame with lowest counter. If its more than one, get a random frame between minimums
+    min_frames = self._get_minimums()
+    random_index = randint(0, len(min_frames) - 1)
+    self.allocatedFrames.pop(min_frames[random_index])
+    return min_frames[random_index]
 
   def clock(self):
-    # When clock ticks, shift everybody to the right
+    # When clock ticks, add the reference bit to the left of the counter, shift everybody's counter to the right, clear reference bits
     for key, value in self.allocatedFrames.items():
-      self.allocatedFrames[key] = value >> 1
-
+      self.allocatedFrames[key][1] = value[0] << (ALGORITHM_AGING_NBITS - 1) | value[1]
+      self.allocatedFrames[key][1] = self.allocatedFrames[key][1] >> 1
+      self.allocatedFrames[key][0] = 0
 
   def access(self, frameId, isWrite):
-    # Add the reference bit (1) to the left of the counter. Doesn't care if isWrite
-    self.allocatedFrames[frameId] = 1 << (ALGORITHM_AGING_NBITS - 1) | self.allocatedFrames[frameId]
+    # Update reference bit. This algorithm doesn't care if isWrite
+    self.allocatedFrames[frameId][0] = 1
+
+  def _get_minimums(self):
+    # Get list of frameId with minimum counters
+    min_frames = []
+    min_value = float("inf")
+    for key, value in self.allocatedFrames.items():
+        if value[1] == min_value:
+            min_frames.append(key)
+        if value[1] < min_value:
+            min_value = value[1]
+            min_frames = []
+            min_frames.append(key)
+    return min_frames
 
   def printMe(self):
     print (self.allocatedFrames)
@@ -200,6 +215,7 @@ if __name__ == '__main__':
   phy.access(5, False)
   phy.access(6, True)
   phy.access(2, False)
+  phy.clock()
   phy.printMe()
   print(phy.evict())
   phy.printMe()
