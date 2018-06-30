@@ -2,12 +2,13 @@ import sys
 from sys import stderr
 from process import Process
 from sched_policy import Scheduler
-from priority_random import *
 from sim_engine import Event
 from sim_engine import EventStream
 import uuid
 from datetime import datetime
 import ConfigParser
+
+import priority_random as priority_random
 
 
 class WorkloadParser(object):
@@ -75,7 +76,6 @@ def run_simulation(event_stream):
     while True:
         event = event_stream.next()
         if (not event): break
-
         previous_t = Clock.current_time
         Clock.current_time = event.get_timestamp()
 
@@ -102,14 +102,13 @@ def run_simulation(event_stream):
                     event_stream.add(Event(event_types.EXIT_PROC, exit_timestamp, in_proc))
 
         elif (event.get_type() == event_types.ALLOC_PROC):
-
+            print "Allocation"
             new_proc = event.get_context()
 
             #update simulation stats
             new_proc.set_creation_t(Clock.now())
 
             p_table.add(new_proc)
-            print "ALLOC"
             scheduler.alloc_proc(new_proc, Clock.now() - previous_t)
             procs.append(new_proc)
 
@@ -150,35 +149,28 @@ SLICE_DURATION = 20
 
 def generate_output(out):
     # Generate output file.
-    aux = PriorityRandom()
 
     configParser = ConfigParser.RawConfigParser()
     path = "sim.conf"
     configParser.read(path)
-    extra_time_output = configParser.get("extra_time", "path")
-    timeline_output = configParser.get("timeline", "path")
+    extra_time_output = configParser.get("simulation", "extra_time_path")
+    timeline_output = configParser.get("simulation", "timeline_path")
 
     try:
-        with open(timeline_output, 'w') as timeline_out_file, open(extra_time_output, 'w') as extra_time_file:
-            timeline_lines = []
-            extra_time_lines = []
-            timeline_lines.append('process service start_t end_t\n')
+        with open(timeline_output, 'a') as timeline_out_file, open(extra_time_output, 'a') as extra_time_file:
 
             for proc in out:
-                print "Priority ", proc.get_priority(), aux._find_priority(proc.get_priority())
+
+                print "Priority ", proc.get_priority(), priority_random.find_priority(proc.get_priority())
                 expect_exit_t = proc.get_creation_t() + proc.get_service_t()
                 extra_t = proc.get_exit_t() - expect_exit_t
-                extra_time_lines.append(str(extra_t) + " " + str(aux._find_priority(proc.get_priority())) +'\n')
+
+                extra_time_file.write(str(extra_t) + " " + str(priority_random.find_priority(proc.get_priority())) +'\n')
+
                 pid = proc.get_pid()
-                timeline_lines.append(str(pid) + ' expected '  + str(proc.get_creation_t()) + ' ' + str(expect_exit_t) + '\n'
+                timeline_out_file.write(str(pid) + ' expected '  + str(proc.get_creation_t()) + ' ' + str(expect_exit_t) + '\n'
                     + str(pid) + ' real ' + str(expect_exit_t) + ' ' + str(proc.get_exit_t()) + '\n')
             
-            for line in timeline_lines:
-                timeline_out_file.writelines(line)
-
-            for line in extra_time_lines:
-                extra_time_file.writelines(line)
-
     except Exception as e:
         print 'Unable to write file property: %s.' % str(e)
 
@@ -187,22 +179,24 @@ def select_scheduler():
     configParser = ConfigParser.RawConfigParser()
     path = "sim.conf"
     configParser.read(path)
-    algorithm = configParser.get("scheduler", "algorithm")
+    algorithm = configParser.get("simulation", "scheduler_algorithm")
 
-    if algorithm == "RoundRobin":
-        return RoudRobin()
-    elif algorithm == "PriorityRandom":
-        return PriorityRandom()
-    elif algorithm == "Xv6PriorityRandom":
-        return Xv6PriorityRandom()
-    else:
+    try:
+        return getattr(priority_random, algorithm)()
+
+    except AttributeError as err:
+        print err.message
         return Scheduler()
 
 if __name__ == '__main__':
     #read workload file in the standard directory
     wlp = WorkloadParser()
 
-    input_file = sys.argv[1]
+    configParser = ConfigParser.RawConfigParser()
+    path = "sim.conf"
+    configParser.read(path)
+    input_file = configParser.get("simulation", "workload_path")
+
     ordered_process_list = wlp.parse(input_file)
     events = [Event(event_types.ALLOC_PROC, proc.get_timestamp(), proc)
                 for proc in ordered_process_list]

@@ -1,8 +1,7 @@
 from random import randint
 from process import Process
 
-class PriorityRandom():
-	"""Implements xv6 scheduler without bugs"""
+class RoundRobin:
 
 	def __init__(self):
 		self._process_list = []
@@ -10,8 +9,35 @@ class PriorityRandom():
 
 	def alloc_proc(self, process, delta_t):
 		"""Update the data structures to recognize a new process was created"""
+		print "Allocating process ", process.get_pid()
 		self._process_list.append(process)
 
+	def schedule(self, pid, delta_t):
+		"""Return the next process to run in the cpu.
+
+		out_process_pid -- the pid of the process that just left the cpu, or None
+		in case there was no process running. The engine is responsible
+		for updating the usage time.
+		"""
+		size = len(self._process_list)
+
+		if size == 0: 
+			return None
+
+		process = self._process_list[self._last_index % size]
+		self._last_index = self._last_index + 1
+		return process
+
+	def exit(self, process_pid):
+		"Update data structures to reconize a process was finished"
+		# print "Removing process ", process_pid
+		self._process_list = [proc for proc in self._process_list if proc.pid != process_pid]
+
+class PriorityRandom(RoundRobin):
+	"""Implements xv6 scheduler without bugs"""
+
+	def __init__(self):
+		RoundRobin.__init__(self)
 
 	def schedule(self, pid, delta_t):
 		"""Return the next process to run in the cpu.
@@ -28,7 +54,7 @@ class PriorityRandom():
 		
 		while True:
 
-			priority = self._select_priority()
+			priority = sort_priority()
 			# print "SCHEDULING PRIORITY ", priority, "\n"
 			actual_index = self._last_index + 1
 
@@ -39,7 +65,7 @@ class PriorityRandom():
 				
 				process =  self._process_list[actual_index]       
 				
-				if self._find_priority(process.get_priority()) == priority:
+				if find_priority(process.get_priority()) == priority:
 					self._last_index = self._process_list.index(process)
 					# print "FIND PROCESS " , actual_index, "\n"
 					return process
@@ -55,30 +81,11 @@ class PriorityRandom():
 					if actual_index == self._last_index: 
 						break
 
-	def _find_priority(self, value):
-
-		if value <= 5: return 0
-		elif value <= 10: return 1
-		elif value <= 15: return 2
-		else: return 3
-
-	def _select_priority(self):
-		
-		rand = randint(1, 100)
-
-		if rand <= 50: return 3
-		elif rand <= 75: return 2
-		elif rand <= 90: return 1
-		else: return 0
-
-	def exit(self, process_pid):
-		self._process_list = [proc for proc in self._process_list if proc.pid != process_pid]
-
-class Xv6PriorityRandom(PriorityRandom):
+class Xv6PriorityRandom(RoundRobin):
 	"""Implements xv6 scheduler with bugs"""
 
 	def __init__(self):
-		PriorityRandom.__init__(self)
+		RoundRobin.__init__(self)
 
 	def schedule(self, pid, delta_t):
 		"""Return the next process to run in the cpu.
@@ -96,7 +103,7 @@ class Xv6PriorityRandom(PriorityRandom):
 		
 		while True:
 
-			priority = self._select_priority()
+			priority = sort_priority()
 			# print "SCHEDULING PRIORITY ", priority, "\n"
 			actual_index = self._last_index + 1
 
@@ -108,7 +115,7 @@ class Xv6PriorityRandom(PriorityRandom):
 				
 				process =  self._process_list[actual_index]       
 				
-				if self._find_priority(process.get_priority()) == priority:
+				if find_priority(process.get_priority()) == priority:
 					self._last_index = self._process_list.index(process)
 					return process
 								
@@ -117,30 +124,29 @@ class Xv6PriorityRandom(PriorityRandom):
 
 					if actual_index >= len(self._process_list):
 						actual_index = 0
-						priority = self._select_priority()
+						priority = sort_priority()
 
 					# print "LAST INDEX: ", self._last_index, " ACTUAL INDEX: ", actual_index					
 
 					if actual_index == self._last_index: 
 						break
 
-class RoudRobin(PriorityRandom):
 
-	def __init__(self):
-		PriorityRandom.__init__(self)
+def find_priority(value):
 
-	def schedule(self, pid, delta_t):
-		
-		size = len(self._process_list)
+	if value <= 5: return 0
+	elif value <= 10: return 1
+	elif value <= 15: return 2
+	else: return 3
 
-		if size == 0: 
-			return None
+def sort_priority():
+	
+	rand = randint(1, 100)
 
-		process = self._process_list[self._last_index % size]
-		self._last_index = self._last_index + 1
-		return process
-
-
+	if rand <= 50: return 3
+	elif rand <= 75: return 2
+	elif rand <= 90: return 1
+	else: return 0
 
 if __name__ == '__main__':
 
@@ -156,7 +162,7 @@ if __name__ == '__main__':
         service_time = randint(40, 400)
 
         process = Process(timestamp_c, pid_c, priority, service_time)
-        sched.alloc_proc(process)
+        sched.alloc_proc(process.get_pid(), 0)
     
     print sched._process_list
     print "\n"
