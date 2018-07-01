@@ -19,9 +19,9 @@ dev.off()
 # Generate boxplot.
 # BoxPlot about the extra time needed by the processes.
 
-extra_time_data = read.table("output/extra_time_rnd_rr.ffd", header = T)
+extra_time_data = read.table("output/extra_time_busy_xpr.ffd", header = T)
 
-png(filename = "plots/extra_time_rnd_rr_plot.png", width = 600, height = 600, units = "px",res = 120)
+png(filename = "plots/extra_time_busy_xpr_plot.png", width = 600, height = 600, units = "px",res = 120)
 ggplot(data = extra_time_data, aes(y = extra_time_data$extra_time, x = extra_time_data$priority, group = extra_time_data$priority)) +
   geom_boxplot() +
   labs(title = "Extra time Execution", x = "Priority", y = "Extra Time In System")
