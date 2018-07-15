@@ -1,88 +1,103 @@
-QS_SIZE           = 32
-TICKS_PER_SECOND  = 2
-BASELINE_PRIORITY = 10
 from process import Process
+from params_py import PRIORITY_ONE, PRIORITY_TWO, PRIORITY_THREE, PRIORITY_FOUR 
 
 class Scheduler:
-    """ Scheduler Simulation
-    This class aims to simulate a kernel process scheduler.
-    Its implementation is similar to the described in section
-    "5.4.2 - Scheduler Implementation" of the Unix Internals book.
-    """
-    def __init__(self):
-		""" Initialize the object Scheduler.
-		Create the processes classes in qs structure.
+	def __init__(self):
+		"""Data structure which contains all processes"""
+		self.processes = []
+		self.last_proc_prio_two = None
+		self.last_proc_prio_three = None
+		self.last_proc_prio_four = None
+
+	def schedule(self, out_process_pid, delta_t):
+		"""Return the next process to run in the cpu.
+		out_process_pid -- the pid of the process that just left the cpu, or None
+		in case there was no process running. The engine is responsible
+		for updating the usage time.
 		"""
-		self.qs = [ [] for i in xrange(QS_SIZE)]
+		self._avoid_starvation()
 
-    def schedule(self, out_process_pid, delta_t):
-        """Return the next process to run in the cpu.
+		proc_to_run = self._next_proc(out_process_pid, PRIORITY_ONE)
+		
+		if (proc_to_run):
+			proc_to_run.change_current_to_real_priority()
+			return proc_to_run
+		else:
+			proc_to_run = self._next_proc(self.last_proc_prio_two, PRIORITY_TWO)
+			
+			if (proc_to_run):
+				proc_to_run.change_current_to_real_priority()
+				self.last_proc_prio_two = proc_to_run.get_pid()
+				return proc_to_run
+			else:
+				proc_to_run = self._next_proc(self.last_proc_prio_three, PRIORITY_THREE)
+			
+				if (proc_to_run):
+					proc_to_run.change_current_to_real_priority()
+					self.last_proc_prio_three = proc_to_run.get_pid()
+					return proc_to_run
+				else:
+					proc_to_run = self._next_proc(self.last_proc_prio_four, PRIORITY_FOUR)
+					
+					if (proc_to_run):
+						proc_to_run.change_current_to_real_priority()
+						self.last_proc_prio_four = proc_to_run.get_pid()
+						return proc_to_run
+					else:
+						return None
+	
+	def alloc_proc(self, process, delta_t):
+		"""Update the data structures to recognize a new process was created"""
+		self.processes.append(process)
 
-        out_process_pid -- the pid of the process that just left the cpu, or None
-        in case there was no process running. The engine is responsible
-        for updating the usage time.
-        """
-        self._update_proc_fields(delta_t)
-        proc_to_alloc = None
-        for class_ in self.qs:
-            if class_:
-                proc_index = -1
-                for i in xrange(len(class_)):
-                    if class_[i].state == Process.RUNNABLE:
-                        proc_index = i
-                if proc_index == -1:
-                    continue
-                proc_to_alloc = class_.pop(proc_index)
-                class_.append(proc_to_alloc)
-                return proc_to_alloc
+	def _next_proc(self, last_proc_pid, priority_interval):
+		"""Gets the next runnable process in priority interval"""
+		proc = None
+		
+		if (len(self.processes) > 0):
+			for i in range(len(self.processes)):
+				if (self.processes[i].get_pid() == last_proc_pid):
+					break
+			
+			if ((i + 1) == len(self.processes)):
+				index = 0
+			else:
+				index = i + 1	
+			
+			while (index != i):
+				if (self.processes[index].get_current_priority() in priority_interval):
+					break
+					
+				index += 1
+				
+				if (index == len(self.processes)):
+					index = 0
+			
+			if (self.processes[index].get_current_priority() in priority_interval):
+				proc = self.processes[index]
+						
+		return proc
 
-    def alloc_proc(self, process, delta_t):
-        self._update_proc_fields(delta_t)
-        """Update the data structures to recognize a new process was created"""
-        self._update_proc_fields(delta_t)
-        p_index_class = self.calculate_class(process.priority)
-        self.qs[p_index_class].append(process)
+	def _avoid_starvation(self):
+		"""Decrements current priority to avoid starvation"""
+		proc_prio_two = self._next_proc(self.last_proc_prio_two, PRIORITY_TWO)
 
-    def exit(self, process_pid):
-        pass
+		if proc_prio_two:
+			proc_prio_two.decrement_current_priority()
 
-    def calculate_class(self, ker_priority):
-        index_class = 0
-        for i in xrange(0, 127, 4):
-            if i <= ker_priority <= i + 3:
-                return index_class
-            index_class += 1
-        return index_class -1
+		proc_prio_three = self._next_proc(self.last_proc_prio_three, PRIORITY_THREE)
+	
+		if proc_prio_three:
+			proc_prio_three.decrement_current_priority()
 
-    def _update_proc_fields(self, delta_t):
-        # update proc fields and reorganize the qs structure.
-        temp_qs = [ [] for i in xrange(QS_SIZE)]
-        for i in xrange(QS_SIZE):
-            p_runnable_c = 0
+		proc_prio_four = self._next_proc(self.last_proc_prio_four, PRIORITY_FOUR)
 
-            for proc in self.qs[i]:
-                if proc.state == Process.RUNNABLE:
-                    p_runnable_c += 1
+		if proc_prio_four:
+			proc_prio_four.decrement_current_priority()
 
-            load_average = (p_runnable_c / len(self.qs[i])) if len(self.qs[i]) != 0 else 0
-            for proc in self.qs[i]:
-                decay_factor = (2 * load_average)/(2 * load_average + 1)
-                proc.p_cpu -= (decay_factor * delta_t) # Decrement for each second.
-                if proc.state == Process.RUNNING:
-                    proc.p_cpu += (TICKS_PER_SECOND * (delta_t/2)) # Incrememt for each tick.
-
-                # recalculate ker_priority.
-                proc.ker_priority = BASELINE_PRIORITY + (proc.p_cpu / 4) + (proc.priority * 2)
-                class_index = self.calculate_class(proc.ker_priority)
-
-                # DEBUG for adjust numbers.
-                # print ">> Priority: [%d] to PID [%d] " % (proc.ker_priority, proc.pid)
-                # print "Class: [%d] <<" % class_index
-
-                if class_index != i:
-                    temp_qs[class_index].append(proc)
-                    self.qs[i].remove(proc)
-
-        for i in xrange(QS_SIZE):
-            self.qs[i].extend(temp_qs[i])
-
+	def exit(self, process_pid):
+		"""Removes a process from process list"""
+		for i in range(len(self.processes)):
+			if self.processes[i].get_pid() == process_pid:
+				del self.processes[i]
+				break

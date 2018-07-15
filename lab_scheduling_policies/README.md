@@ -1,11 +1,11 @@
-# Especificação do Algoritmo de Escalonamento - Lab 02
+# Algoritmos de Escalonamento
 
 
-## Especificação do Algoritmo planejado
+## Especificação do Algoritmo planejado - Lab 02
 
 O **algoritmo de escalonamento** de processos será implementado seguindo o modelo de loteria com prioridade.
 
-Existirão **quatro classes de prioridade** no sistema com valores que variam de 0 a 3, sendo a **prioridade 0** como a **menos relevante** e a **prioridade 3** como a **mais relevante**.
+Existirão **quatro classes de prioridade** no sistema com valores que variam de 0 a 3, sendo a **prioridade 3** como a **mais relevante** e a **prioridade 0** como a **menos relevante**.
 
 Os processos a serem executados serão enfileirados em uma lista, que é **ordenada segundo seu PID**, representando a ordem de chegada no sistema.
 
@@ -22,62 +22,111 @@ Portanto, em um **processamento médio de várias interações** é esperado que
 - Prioridade 2: 25%
 - Prioridade 3: 50%
 
-## Análise do Desempenho na simulação
+## Análise do Desempenho na simulação - Lab3
 
 As simulações foram realizadas considerando três políticas de escalonamento de processos:
 
-* **Round Robin**: que distribui igualmente o tempo de CPU entre os processos ativos;
-* **Priority Random**: que realiza um sorteio da prioridade a ser atendida, conforme descrito no tópico anterior;
-* **Xv6 Priority Random**: que faz o mesmo que o anterior, porém realiza um novo sorteio a cada vez que não é encontrada um processo com a prioridade sorteada na lista, em uma varredura parcial.
+- **Round Robin**: que distribui igualmente o tempo de CPU entre os processos ativos;
+- **Priority Random**: que realiza um sorteio da prioridade a ser atendida, conforme descrito no tópico anterior;
+- **Xv6 Priority Random**: que faz o mesmo que o anterior, porém realiza um novo sorteio a cada vez que não é encontrada um processo com a prioridade sorteada na lista, em uma varredura parcial.
+- **Priority Updating**: que decrementa o valor da prioridade de todos os processos a cada escalonamento, e ao retirar um processo da CPU atualiza o valor da sua prioridade para o valor originalmente definido. 
 
-Para realizar a simulação foram geradas duas cargas de trabalho, cada uma com trinta processos.
+Importante mencionar que para possibilitar uma análise comparativa uma alteração foi realizada nos algoritmos de sorteio onde se realizou a inversão do peso das prioridades, assim a prioridade 0 passou a ser a mais relevante e a prioridade 3 a menos relevante, mantendo-se a distribuição estatística do sorteio.
 
-### Simulação com Carga de Trabalho Aleatória
+Para realizar a simulação foram geradas três cargas de trabalho, onde o número de processos por prioridade e o tempo de execução seriam iguais, e podem assumir quatro valores(5, 10, 15, 20), e o número total de processos seria de 20, 40 e 200.
 
-A primeira que tem o objetivo de gerar um situação próxima da realidade onde entrega-se a aleatoriedade a decisão sobre o tempo de duração do processo, sua prioridade e o momento em que ele é iniciado.
+Assim, para os algoritmos baseados em sorteio, que trabalho com 4 classes de prioridade, foi realizada uma relação de equivalência mantendo a ordem numérica.
 
-![](plots/workload_rnd_plot.png)
+A partir da carga de trabalho, o objetivo é avaliar o desempenho dos algoritmos conforme os parêmetros dados no livro de sistemas operacionais do tanebaum, que seriam:
 
-A partir da imagem podemos verificar que a duração dos processos nunca ultrapassa o limite de 1000 segundos no caso da carga de trabalho aleatória.
+- **Aplicação da política**: Verificar se a política proposta foi devidamente cumprida;
+- **Justiça**: Verificar se os processos foram tratados de forma igual, considerando seu nível de igualdade;
 
-Outro ponto importante a se mencionar é que a duração dos procesoss de prioridade 2 e 3 são considerávelmente maiores que os de prioridade menor.
+### Carga de Trabalho
 
-Assim realizar ao simulação utilizando a política de escalonamento **Round Robin** ficou clara a distribuição equânime da CPU entre os processo:
+Inicialmente devemos relatar que das quatro funções de escalonamento apenas a Round Robin foi capaz de realizar a atividade em todas as cargas em tempo aceitável, menos de 1 hora, enquanto a função de prioridade por agrupamento apenas conseguiu executar a primeira carga com 20 processos.
 
-![](plots/extra_time_rnd_rr_plot.png)
+Diante do ocorrido, e para atingir a finalidade desse estudo, iremos analizar apenas a carga de trabalho que foi executada nas quatro políticas, que tem a distribuíção de requisições conforme o gráfico abaixo:
 
-Assim podemos perceber que os processos de todas as prioridades tiveram um tempo de execução médio entre 1750 e 2000 segundos.
+![](plots/workload20.png)
 
-No caso da política de escalonamento **Priority Random** a política de priorização causou uma drástica redução no tempo de execução das tarefas de prioridade 3 em detrimento das demais.
+Assim, a partir da visualização da carga de trabalho, podemos analisar que o sistema sofre uma sobrecarga de processos a partir do tempo 20, que corresponde a submissão do último processo, até a finalização do primeiro processo a cumprir seu tempo de execução tempo este que pode variar, mas no mínimo é de 101, visto que todos os processos tem tempo de execução de 100.
 
-Contudo o mesmo não aconteceu integralmente com as prioridas 1 e 2, onde era esperado que todos os processos de prioridade 2 tivessem um tempo de execução inferior aos de prioridade 1, mas como o intervalo dos dois casos tem valores sobrepostos, então não podemos afirmar com toda a certeza de que o comportamento esperado não ocorreu. 
+### Aplicação da política
 
-![](plots/extra_time_rnd_pr_plot.png)
+As políticas cumpriram o esperado, conforme podemos ver nos gráficos abaixo que expressam o tempo de execução de cada processo submetido ao sistema no eixo X e o correspondente Id no eixo Y:
 
-Por fim, no caso do algoritmo implementado no xv6 é perceptível resultados similares ao anterior, mas devido as diferenças de implementação, que causam uma maior quantidade de sorteios, o que resultou numa maior equalização dos resultados, inclusive com a redução da diferença no tempo de execução entre as prioridades 1 e 2.
+Round Robin             |  Priority Updating
+:-------------------------:|:-------------------------:
+![](plots/timeline20_rr_plot.png) | ![](plots/timeline20_kr_plot.png)
 
-![](plots/extra_time_rnd_xpr_plot.png)
+Priority Random             |  Xv6 Priority Random
+:-------------------------:|:-------------------------:
+![](plots/timeline20_pr_plot.png) | ![](plots/timeline20_xv6_plot.png)
 
-Assim, podemos concluir que as políticas de prioridade atigiram seu objetivo, e a política implementada no kernel do xv6 teve um desempenho melhor do que o esperado, visto que a diferença de implementação foi vista inicialmente como um equívoco.
+Assim, considerando que a prioridade dos processos faz um ciclo a cada 4 processos, temos que o priority updating realizar uma grande priorização, visto a distância dos valores escolhidos ao atribuir as prioridades, enquanto as políticas baseadas em sorteio tendem a distribuir melhor o tempo baseado no percentual de chance de cada prioridade.
 
-### Simulação com Carga de Trabalho Ocupada
+Diante dos resultados, podemos afirmar que as políticas cumprem suas finalidades, conforme a expectativa.
 
-A segunda modifica a anterior apenas para que todos os processos tenham a mesma duração de 100 segundos, e sejam iniciados em uma ordem com diferença de início de apenas 1 segundo entre o processo anterior e o atual, fazendo com que haja um maior congestionamento na hora do escalonador selecionar um processo.
+### Justiça
 
-![](plots/workload_busy_plot.png)
+O grau de justiça dos algoritmos foi avaliado considerando a variação de duas variáveis:
 
-A partir da imagem acima fica claro que a duração da maioria dos procesos de prioridade 0 e 1 são maiores que os de prioridade 2, mas os processos de prioridade 3 tem duração maior que os de prioridade 1 e 2, mas ainda são menores que os prioridade 0. 
+- *tempo extra de execução*: representa a diferente entre o tempo que o processo deveria ficar no sistema, e o tempo que o processo realmente ficou no sistema;
+- *tempo de resposta*: representa a demora de tempo que o processo teve para ocupar a CPU pela primeira vez. 
 
-Novamente o **Round Robin** teve o comportamento esperado distribuindo por igual o tempo de execução dos processos ficando entre 1250 e 1500 segundos.
+#### Tempo Extra de Execução
 
-![](plots/extra_time_busy_rr_plot.png)
+Foi realizado o boxplot para verificar o grau de variância dos valores correspondentes a diferença entre o tempo que o processo deveria ficar no sistema, e o tempo que ele efetivamente ficou.
 
-Assim como na simulação anterior, tivemos resultados satisfatórios, onde os processos de maior prioridade concluíram sua execução em temos menor, especialmente os processo de prioridade 3, e novamente uma sobreposição entre os resultados dos processos de prioridade 1 e 2.
+Assim, o tamanho da caixa implica o grau de variação dos valores de tempo de execução adicional ao tempo definido na submissão, e quanto menor for maior o grau de justiça.
 
-![](plots/extra_time_busy_pr_plot.png)
+O plot separa as caixas de acordo com as quatro classes de prioridade existentes, vejamos:
 
-Assim como na simulação anterior, a implementação do kernel xv6 causou um maior agrupamento dos resultados, porém no caso de haver uma situação de sobrecarga, houve uma redução inesperada no tempo de execução dos processos de prioridade 1, fato este que é consequência direta do excesso de sorteio, que pode desfavorecer os processos com valor de sorteio tão próximo.
+Round Robin             |  Priority Updating
+:-------------------------:|:-------------------------:
+![](plots/extra_time20_rr.png) | ![](plots/extra_time20_kr.png)
 
-![Xv6 Ocupado](plots/extra_time_busy_xpr_plot.png)
+Priority Random             |  Xv6 Priority Random
+:-------------------------:|:-------------------------:
+![](plots/extra_time20_pr.png) | ![](plots/extra_time20_xv6.png)
 
-Desta forma, após a coleta dos resultados das simulações podemos concluir que o algoritmo de priorização utilizando o sorteio obteve êxito em reduzir o tempo de execução dos processos com prioridade 3 quando comparado com os demais, contudo o mesmo não pode ser dito quanto aos processos de prioridade 1 e 2 que ficaram com tempo de execução próximo, o que não foi esperado, mas esse comportamento pode ser atribuído a pequena  diferença entre a chance de ambas, que não ultrapassa o valor de 10.
+A partir dos gráficos, podemos avaliar que das quatro políticas analisadas cumpriram com seu requisito de justiça, bastando observar que no **Round Robin** as quatro caixas tem valores muito próximos e nos demais existe uma diferença de patamar conforme se varia a prioridade.
+
+Por outro lado, foi verificada uma diferença no grau de justiça dos algoritmos, que podem ser ordenados da seguinte forma: Round Robin > Priority Updating > Priority Random > Xv6 Priority Random.
+
+Tal diferença é decorrente do grau de variação da escolha do processo a ser executado: 
+
+- **Round Robin**: que tem um comportamento sempre constante, tem menor grau de variância;
+- **Priority Updating**: realiza modificações no valor das prioridades ao longo da execução, o que geral algum grau de varialibilidade;
+- **Priority Random** e **Xv6 Priority Random**: tem um alto nível de modificação, mas o *primeiro* é mais eficaz em razão da característica do *segundo* de realizar mais de um sorteio no mesmo escalonamento sem verificar todos os processos contidos na lista.
+
+#### Tempo de resposta
+
+Utilizou-se de boxplot para observar o grau de variância dos valores correspondentes ao tempo de resposta dos processos, conforme os gráficos abaixo:
+
+Round Robin             |  Priority Updating
+:-------------------------:|:-------------------------:
+![](plots/wait_time20_rr.png) | ![](plots/wait_time20_kr.png)
+
+Priority Random             |  Xv6 Priority Random
+:-------------------------:|:-------------------------:
+![](plots/wait_time20_pr.png) | ![](plots/wait_time20_xv6.png)
+
+Os resultados demonstram fatos interessantes sobre as políticas, o **Roud Robin** conforme esperado não faz distinção de prioridade, por consequência o tempo de resposta de todas os processos é igual.
+
+As políticas que consideram prioridade tiveram uma alta variância nos valores, especialmente a **Priority Updating**, onde os processos com prioridade diferente de 0 tiveram um tempo de espera superior a 500, o que não acontece com as demais.
+
+Assim, diante da grande diferença de valores entre as prioridades, podemos fazer uma análise da variação dos valores na prioridade 0, considerando as 4 políticas, através do boxplot abaixo:
+
+![](plots/wait_time_p0.png)
+
+Ante o gráfico, fica fácil perceber que o **Round Robin** não está sujeito a variação do valor de espera, enquanto as demais políticas tem um menor grau de justiça.
+
+Importante observar que a política **Priority Updating** tem tempo de espera sempre menor que o **Round Robin**, fato este que não é verdade para as demais políticas de priorização que inclusivem contém valores isolados da caixa(*outliers*).
+
+## Conclusões
+
+Diante dos resultados, podemos aduzir que as políticas de prioridade atingem com sucesso sua finalidade.
+
+Contudo, cada abordagem de priorização tem suas peculiaridades que podem ser interessantes a depender do workload a ser submetido e da finalidade desejada. Por exemplo: o tempo de resposta do algoritmo **Priority Updating** garante um menor valor nos processos de maior prioridade, que é igual a 20 no pior caso, e sacrifica muito os demais, com valor maior que 500 no melhor caso; por outro lado, os demais algoritmos de prioridade, reduzem em menor proporção e com maior variância, mas o fazem para todas as prioridades, mantendo o tempo médio de espera para prioridade menor do que 20, e menor do que 50 o de maior prioridade.

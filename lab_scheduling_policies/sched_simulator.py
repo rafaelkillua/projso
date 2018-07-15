@@ -80,6 +80,7 @@ def run_simulation(event_stream):
         Clock.current_time = event.get_timestamp()
 
         if (event.get_type() == event_types.SCHEDULE):
+            # print "Scheduling"
 
             #remove old runnning proc
             out_proc = cpu.take_cpu()
@@ -93,6 +94,10 @@ def run_simulation(event_stream):
             #choose the next proc to enter cpu
             in_proc = scheduler.schedule(out_pid, Clock.now() - previous_t)
 
+            if in_proc and in_proc.get_creation_t() == -1:
+                #update simulation stats
+                in_proc.set_creation_t(Clock.now())
+
             #enter cpu and schedule an exit event, if necessary
             if (in_proc):
                 cpu.enter_cpu(in_proc)
@@ -102,17 +107,15 @@ def run_simulation(event_stream):
                     event_stream.add(Event(event_types.EXIT_PROC, exit_timestamp, in_proc))
 
         elif (event.get_type() == event_types.ALLOC_PROC):
-            print "Allocation"
+            # print "Allocation"
             new_proc = event.get_context()
-
-            #update simulation stats
-            new_proc.set_creation_t(Clock.now())
 
             p_table.add(new_proc)
             scheduler.alloc_proc(new_proc, Clock.now() - previous_t)
             procs.append(new_proc)
 
         elif (event.get_type() == event_types.EXIT_PROC):
+            # print "Finishing"
 
             exit_proc = event.get_context()
 
@@ -157,18 +160,30 @@ def generate_output(out):
     timeline_output = configParser.get("simulation", "timeline_path")
 
     try:
-        with open(timeline_output, 'a') as timeline_out_file, open(extra_time_output, 'a') as extra_time_file:
+        with open(timeline_output, 'a') as timeline_out_file,\
+            open(timeline_output, 'r') as timeline_out_file_r,\
+            open(extra_time_output, 'a') as extra_time_file,\
+            open(extra_time_output, 'r') as extra_time_file_r:
+
+            if timeline_out_file_r.read() == "":
+                timeline_out_file.write("process service start_t end_t\n")
+            
+            if extra_time_file_r.read() == "":
+                extra_time_file.write("process extra_time wait_time priority\n")
 
             for proc in out:
 
                 print "Priority ", proc.get_priority(), priority_random.find_priority(proc.get_priority())
-                expect_exit_t = proc.get_creation_t() + proc.get_service_t()
+                expect_exit_t = proc.get_timestamp() + proc.get_service_t()
                 extra_t = proc.get_exit_t() - expect_exit_t
+                wait_time = proc.get_creation_t() - proc.get_timestamp()
 
-                extra_time_file.write(str(extra_t) + " " + str(priority_random.find_priority(proc.get_priority())) +'\n')
+                extra_time_file.write(str(proc.get_pid()) + " " + str(extra_t) + " " +\
+                                    str(wait_time) + " " +\
+                                    str(priority_random.find_priority(proc.get_priority())) +'\n')
 
                 pid = proc.get_pid()
-                timeline_out_file.write(str(pid) + ' expected '  + str(proc.get_creation_t()) + ' ' + str(expect_exit_t) + '\n'
+                timeline_out_file.write(str(pid) + ' expected '  + str(proc.get_timestamp()) + ' ' + str(expect_exit_t) + '\n'
                     + str(pid) + ' real ' + str(expect_exit_t) + ' ' + str(proc.get_exit_t()) + '\n')
             
     except Exception as e:

@@ -44,6 +44,15 @@ class Process(object):
     def get_priority(self):
         return self.priority
 
+    def get_current_priority(self):
+        return self.ker_priority
+
+    def change_current_to_real_priority(self):
+        self.ker_priority = self.priority  
+
+    def decrement_current_priority(self):
+        self.ker_priority -= 1
+
     def get_service_t(self):
         return self.service_t
 

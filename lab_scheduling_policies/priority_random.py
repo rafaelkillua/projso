@@ -1,3 +1,4 @@
+
 from random import randint
 from process import Process
 
@@ -9,7 +10,6 @@ class RoundRobin:
 
 	def alloc_proc(self, process, delta_t):
 		"""Update the data structures to recognize a new process was created"""
-		print "Allocating process ", process.get_pid()
 		self._process_list.append(process)
 
 	def schedule(self, pid, delta_t):
@@ -25,13 +25,21 @@ class RoundRobin:
 			return None
 
 		process = self._process_list[self._last_index % size]
-		self._last_index = self._last_index + 1
+		self._last_index += 1
 		return process
 
 	def exit(self, process_pid):
 		"Update data structures to reconize a process was finished"
-		# print "Removing process ", process_pid
-		self._process_list = [proc for proc in self._process_list if proc.pid != process_pid]
+
+		proc = None
+
+		for run_proc in self._process_list:
+			if run_proc.get_pid() == process_pid:
+				proc = run_proc
+				break
+
+		if proc:
+			self._process_list.remove(proc)
 
 class PriorityRandom(RoundRobin):
 	"""Implements xv6 scheduler without bugs"""
@@ -143,10 +151,10 @@ def sort_priority():
 	
 	rand = randint(1, 100)
 
-	if rand <= 50: return 3
-	elif rand <= 75: return 2
-	elif rand <= 90: return 1
-	else: return 0
+	if rand <= 50: return 0
+	elif rand <= 75: return 1
+	elif rand <= 90: return 2
+	else: return 3
 
 if __name__ == '__main__':
 
