@@ -9,7 +9,6 @@ extra_time_plot<- function(extra_time_data) {
   
   g_plot <- ggplot(data = extra_time_data, aes(y = extra_time_data$extra_time, x = extra_time_data$priority, group = extra_time_data$priority)) +
     geom_boxplot() +
-    ylim(500, 4000) +
     labs(x = "Priority", y = "Extra Time In System")
   
   return(g_plot)
@@ -18,7 +17,6 @@ extra_time_plot<- function(extra_time_data) {
 wait_time_plot <- function(extra_time_data) {
   g_plot <- ggplot(data = extra_time_data, aes(y = extra_time_data$wait_time, x = extra_time_data$priority, group = extra_time_data$priority)) +
     geom_boxplot() +
-    ylim(500, 4000) +
     labs(x = "Priority", y = "Extra Time In System")
   
   return(g_plot)

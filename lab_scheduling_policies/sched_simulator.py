@@ -95,7 +95,7 @@ def run_simulation(event_stream):
             #choose the next proc to enter cpu
             in_proc = scheduler.schedule(out_pid, Clock.now() - previous_t)
 
-            if in_proc.get_creation_t() == -1:
+            if in_proc and in_proc.get_creation_t() == -1:
                 in_proc.set_creation_t(Clock.now())
 
             #enter cpu and schedule an exit event, if necessary
