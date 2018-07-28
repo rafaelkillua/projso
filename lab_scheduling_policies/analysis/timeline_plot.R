@@ -8,29 +8,29 @@ library(timelineS)
 setwd("~/Documents/workspace/projso/lab_scheduling_policies")
 
 #Round Robin
-timeline <- read.table("output/time_line20_rr.ffd", header = T, sep = " ")
+timeline <- read.table("output/time_line40_rr.ffd", header = T, sep = " ")
 
-png(filename = "plots/timeline20_rr_plot.png", width = 1000, height = 600, units = "px",res = 120)
+png(filename = "plots/timeline40_rr_plot.png", width = 1000, height = 600, units = "px",res = 120)
 timelineG(df = timeline, names = "process", phase = "service", start = "start_t", end = "end_t")
 dev.off()
 
 #Priority Random
-timeline <- read.table("output/time_line20_pr.ffd", header = T, sep = " ")
+timeline <- read.table("output/time_line40_pr.ffd", header = T, sep = " ")
 
-png(filename = "plots/timeline20_pr_plot.png", width = 1000, height = 600, units = "px",res = 120)
+png(filename = "plots/timeline40_pr_plot.png", width = 1000, height = 600, units = "px",res = 120)
 timelineG(df = timeline, names = "process", phase = "service", start = "start_t", end = "end_t")
 dev.off()
 
 #Xv6
-timeline <- read.table("output/time_line20_xv6.ffd", header = T, sep = " ")
+timeline <- read.table("output/time_line40_xv6.ffd", header = T, sep = " ")
 
-png(filename = "plots/timeline20_xv6_plot.png", width = 1000, height = 600, units = "px",res = 120)
+png(filename = "plots/timeline40_xv6_plot.png", width = 1000, height = 600, units = "px",res = 120)
 timelineG(df = timeline, names = "process", phase = "service", start = "start_t", end = "end_t")
 dev.off()
 
 #Kernel
-timeline <- read.table("output/time_line20_kr.ffd", header = T, sep = " ")
+timeline <- read.table("output/time_line40_kr.ffd", header = T, sep = " ")
 
-png(filename = "plots/timeline20_kr_plot.png", width = 1000, height = 600, units = "px",res = 120)
+png(filename = "plots/timeline40_kr_plot.png", width = 1000, height = 600, units = "px",res = 120)
 timelineG(df = timeline, names = "process", phase = "service", start = "start_t", end = "end_t")
 dev.off()
