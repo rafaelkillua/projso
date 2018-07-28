@@ -76,11 +76,12 @@ def run_simulation(event_stream):
     while True:
         event = event_stream.next()
         if (not event): break
+
         previous_t = Clock.current_time
         Clock.current_time = event.get_timestamp()
+        schedule_timestamp = Clock.now() + SLICE_DURATION
 
         if (event.get_type() == event_types.SCHEDULE):
-            # print "Scheduling"
 
             #remove old runnning proc
             out_proc = cpu.take_cpu()
@@ -93,29 +94,37 @@ def run_simulation(event_stream):
 
             #choose the next proc to enter cpu
             in_proc = scheduler.schedule(out_pid, Clock.now() - previous_t)
-
-            if in_proc and in_proc.get_creation_t() == -1:
-                #update simulation stats
-                in_proc.set_creation_t(Clock.now())
-
+            
             #enter cpu and schedule an exit event, if necessary
             if (in_proc):
                 cpu.enter_cpu(in_proc)
                 remaining_t = in_proc.get_service_t() - in_proc.get_usage_t()
-                if (remaining_t < SLICE_DURATION and remaining_t > 0):
-                    exit_timestamp = Clock.now() + remaining_t
-                    event_stream.add(Event(event_types.EXIT_PROC, exit_timestamp, in_proc))
+                if (remaining_t < SLICE_DURATION and remaining_t >= 0):
+					exit_timestamp = Clock.now() + remaining_t
+					if (remaining_t == 0):
+						exit_timestamp += 1
+					event_stream.add(Event(event_types.EXIT_PROC, exit_timestamp, in_proc))
+                else:
+					event_stream.add(Event(event_types.SCHEDULE, schedule_timestamp, None))
+            elif (p_table.size() > 0):
+				event_stream.add(Event(event_types.SCHEDULE, schedule_timestamp, None))
+				
 
         elif (event.get_type() == event_types.ALLOC_PROC):
-            # print "Allocation"
+
             new_proc = event.get_context()
+
+            #update simulation stats
+            new_proc.set_creation_t(Clock.now())
 
             p_table.add(new_proc)
             scheduler.alloc_proc(new_proc, Clock.now() - previous_t)
             procs.append(new_proc)
+            
+            if (p_table.size() == 1):
+				event_stream.add(Event(event_types.SCHEDULE, schedule_timestamp, None))				
 
         elif (event.get_type() == event_types.EXIT_PROC):
-            # print "Finishing"
 
             exit_proc = event.get_context()
 
@@ -136,11 +145,6 @@ def run_simulation(event_stream):
 
             #force a new proc to enter the cpu
             event_stream.add(Event(event_types.SCHEDULE, Clock.now() + 1, None))
-
-        #we were not done yet, then add a new SCHEDULE event
-        if (p_table.size() > 0):
-            schedule_timestamp = Clock.now() + SLICE_DURATION
-            event_stream.add(Event(event_types.SCHEDULE, schedule_timestamp, None))
 
     return procs
 
