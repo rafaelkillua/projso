@@ -106,21 +106,21 @@ wait_time_plot(kr_data)
 dev.off()
 
 #Boxplot do tempo de espera da prioridade 0 para todas as políticas
-#temp <- subset(rr_data, rr_data$priority == 0)
-#rr <- data.frame(group = "Round Robin", value = temp$wait_time)
+temp <- subset(rr_data, rr_data$priority == 0)
+rr <- data.frame(group = "Round Robin", value = temp$wait_time)
 
-#temp <- subset(kr_data, kr_data$priority == 0)
-#pu <- data.frame(group = "Priority Updating", value = temp$wait_time)
+temp <- subset(kr_data, kr_data$priority == 0)
+pu <- data.frame(group = "Priority Updating", value = temp$wait_time)
 
-#temp <- subset(pr_data, pr_data$priority == 0)
-#pr <- data.frame(group = "Priority Random", value = temp$wait_time)
+temp <- subset(pr_data, pr_data$priority == 0)
+pr <- data.frame(group = "Priority Random", value = temp$wait_time)
 
-#temp <- subset(xv6_data, xv6_data$priority == 0)
-#xv6 <- data.frame(group = "Xv6 Priority Random", value = temp$wait_time)
+temp <- subset(xv6_data, xv6_data$priority == 0)
+xv6 <- data.frame(group = "Xv6 Priority Random", value = temp$wait_time)
 
 
-#plot.data = rbind(rr, pu, pr, xv6)
+plot.data = rbind(rr, pu, pr, xv6)
 
-#png(filename = "plots/wait_time_p0.png", width = 600, height = 600, units = "px",res = 120)
-#ggplot(plot.data, aes(x=group, y=value, group=group)) + geom_boxplot()
-#dev.off()
+png(filename = "plots/wait_time_p0.png", width = 600, height = 600, units = "px",res = 120)
+ggplot(plot.data, aes(x=group, y=value, group=group)) + geom_boxplot()
+dev.off()

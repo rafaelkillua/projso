@@ -58,11 +58,11 @@ As políticas cumpriram o esperado, conforme podemos ver nos gráficos abaixo qu
 
 Round Robin             |  Priority Updating
 :-------------------------:|:-------------------------:
-![](plots/timeline20_rr_plot.png) | ![](plots/timeline20_kr_plot.png)
+![](plots/timeline40_rr_plot.png) | ![](plots/timeline40_kr_plot.png)
 
 Priority Random             |  Xv6 Priority Random
 :-------------------------:|:-------------------------:
-![](plots/timeline20_pr_plot.png) | ![](plots/timeline20_xv6_plot.png)
+![](plots/timeline40_pr_plot.png) | ![](plots/timeline40_xv6_plot.png)
 
 Assim, considerando que a prioridade dos processos faz um ciclo a cada 4 processos, temos que o priority updating realizar uma grande priorização, visto a distância dos valores escolhidos ao atribuir as prioridades, enquanto as políticas baseadas em sorteio tendem a distribuir melhor o tempo baseado no percentual de chance de cada prioridade.
 
@@ -85,11 +85,11 @@ O plot separa as caixas de acordo com as quatro classes de prioridade existentes
 
 Round Robin             |  Priority Updating
 :-------------------------:|:-------------------------:
-![](plots/extra_time20_rr.png) | ![](plots/extra_time20_kr.png)
+![](plots/extra_time40_rr.png) | ![](plots/extra_time40_kr.png)
 
 Priority Random             |  Xv6 Priority Random
 :-------------------------:|:-------------------------:
-![](plots/extra_time20_pr.png) | ![](plots/extra_time20_xv6.png)
+![](plots/extra_time40_pr.png) | ![](plots/extra_time40_xv6.png)
 
 A partir dos gráficos, podemos avaliar que das quatro políticas analisadas cumpriram com seu requisito de justiça, bastando observar que no **Round Robin** as quatro caixas tem valores muito próximos e nos demais existe uma diferença de patamar conforme se varia a prioridade.
 
@@ -107,11 +107,11 @@ Utilizou-se de boxplot para observar o grau de variância dos valores correspond
 
 Round Robin             |  Priority Updating
 :-------------------------:|:-------------------------:
-![](plots/wait_time20_rr.png) | ![](plots/wait_time20_kr.png)
+![](plots/wait_time40_rr.png) | ![](plots/wait_time40_kr.png)
 
 Priority Random             |  Xv6 Priority Random
 :-------------------------:|:-------------------------:
-![](plots/wait_time20_pr.png) | ![](plots/wait_time20_xv6.png)
+![](plots/wait_time40_pr.png) | ![](plots/wait_time40_xv6.png)
 
 Os resultados demonstram fatos interessantes sobre as políticas, o **Roud Robin** conforme esperado não faz distinção de prioridade, por consequência o tempo de resposta de todas os processos é igual.
 

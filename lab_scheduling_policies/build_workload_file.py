@@ -22,7 +22,7 @@ def build_process_file():
             str(priority) + ' ' +
             str(service_time) + '\n'
         )
-        timestamp_c += 1
+        timestamp_c = 1
         pid_c += 1
 
     f.close()
