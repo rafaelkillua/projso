@@ -7,6 +7,8 @@
 library(timelineS)
 setwd("~/Documents/workspace/projso/lab_scheduling_policies")
 
+# 40 Processos
+
 #Round Robin
 timeline <- read.table("output/time_line40_rr.ffd", header = T, sep = " ")
 
@@ -32,5 +34,65 @@ dev.off()
 timeline <- read.table("output/time_line40_kr.ffd", header = T, sep = " ")
 
 png(filename = "plots/timeline40_kr_plot.png", width = 1000, height = 600, units = "px",res = 120)
+timelineG(df = timeline, names = "process", phase = "service", start = "start_t", end = "end_t")
+dev.off()
+
+# 400 Processos
+
+#Round Robin
+timeline <- read.table("output/time_line400_rr.ffd", header = T, sep = " ")
+
+png(filename = "plots/timeline400_rr_plot.png", width = 1000, height = 600, units = "px",res = 120)
+timelineG(df = timeline, names = "process", phase = "service", start = "start_t", end = "end_t")
+dev.off()
+
+#Priority Random
+timeline <- read.table("output/time_line400_pr.ffd", header = T, sep = " ")
+
+png(filename = "plots/timeline400_pr_plot.png", width = 1000, height = 600, units = "px",res = 120)
+timelineG(df = timeline, names = "process", phase = "service", start = "start_t", end = "end_t")
+dev.off()
+
+#Xv6
+timeline <- read.table("output/time_line400_xv6.ffd", header = T, sep = " ")
+
+png(filename = "plots/timeline400_xv6_plot.png", width = 1000, height = 600, units = "px",res = 120)
+timelineG(df = timeline, names = "process", phase = "service", start = "start_t", end = "end_t")
+dev.off()
+
+#Kernel
+timeline <- read.table("output/time_line400_kr.ffd", header = T, sep = " ")
+
+png(filename = "plots/timeline400_kr_plot.png", width = 1000, height = 600, units = "px",res = 120)
+timelineG(df = timeline, names = "process", phase = "service", start = "start_t", end = "end_t")
+dev.off()
+
+# 4000 Processos
+
+#Round Robin
+timeline <- read.table("output/time_line4000_rr.ffd", header = T, sep = " ")
+
+png(filename = "plots/timeline4000_rr_plot.png", width = 1000, height = 600, units = "px",res = 120)
+timelineG(df = timeline, names = "process", phase = "service", start = "start_t", end = "end_t")
+dev.off()
+
+#Priority Random
+timeline <- read.table("output/time_line4000_pr.ffd", header = T, sep = " ")
+
+png(filename = "plots/timeline4000_pr_plot.png", width = 1000, height = 600, units = "px",res = 120)
+timelineG(df = timeline, names = "process", phase = "service", start = "start_t", end = "end_t")
+dev.off()
+
+#Xv6
+timeline <- read.table("output/time_line4000_xv6.ffd", header = T, sep = " ")
+
+png(filename = "plots/timeline4000_xv6_plot.png", width = 1000, height = 600, units = "px",res = 120)
+timelineG(df = timeline, names = "process", phase = "service", start = "start_t", end = "end_t")
+dev.off()
+
+#Kernel
+timeline <- read.table("output/time_line4000_kr.ffd", header = T, sep = " ")
+
+png(filename = "plots/timeline4000_kr_plot.png", width = 1000, height = 600, units = "px",res = 120)
 timelineG(df = timeline, names = "process", phase = "service", start = "start_t", end = "end_t")
 dev.off()
