@@ -17,8 +17,23 @@ plot_workload <- function(raw_data) {
     labs(x = "Priority", y = "Expected Time In System")
 }
 
-workload = read.table("input/workload20.ffd", header = F)
+#40 Processos
+workload = read.table("input/workload40.ffd", header = F)
 
-png(filename = "plots/workload20.png", width = 600, height = 600, units = "px",res = 120)
+png(filename = "plots/workload40.png", width = 600, height = 600, units = "px",res = 120)
+plot_workload(workload)
+dev.off()
+
+#400 Processos
+workload = read.table("input/workload400.ffd", header = F)
+
+png(filename = "plots/workload400.png", width = 600, height = 600, units = "px",res = 120)
+plot_workload(workload)
+dev.off()
+
+#4000 Process
+workload = read.table("input/workload4000.ffd", header = F)
+
+png(filename = "plots/workload4000.png", width = 600, height = 600, units = "px",res = 120)
 plot_workload(workload)
 dev.off()

@@ -162,16 +162,10 @@ def generate_output(out):
     path = "sim.conf"
     configParser.read(path)
     extra_time_output = configParser.get("simulation", "extra_time_path")
-    timeline_output = configParser.get("simulation", "timeline_path")
 
     try:
-        with open(timeline_output, 'a') as timeline_out_file,\
-            open(timeline_output, 'r') as timeline_out_file_r,\
-            open(extra_time_output, 'a') as extra_time_file,\
+        with open(extra_time_output, 'a') as extra_time_file,\
             open(extra_time_output, 'r') as extra_time_file_r:
-
-            if timeline_out_file_r.read() == "":
-                timeline_out_file.write("process service start_t end_t\n")
             
             if extra_time_file_r.read() == "":
                 extra_time_file.write("process extra_time wait_time priority\n")
@@ -186,10 +180,6 @@ def generate_output(out):
                 extra_time_file.write(str(proc.get_pid()) + " " + str(extra_t) + " " +\
                                     str(wait_time) + " " +\
                                     str(priority_random.find_priority(proc.get_priority())) +'\n')
-
-                pid = proc.get_pid()
-                timeline_out_file.write(str(pid) + ' expected '  + str(proc.get_timestamp()) + ' ' + str(expect_exit_t) + '\n'
-                    + str(pid) + ' real ' + str(expect_exit_t) + ' ' + str(proc.get_exit_t()) + '\n')
             
     except Exception as e:
         print 'Unable to write file property: %s.' % str(e)
