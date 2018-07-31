@@ -37,7 +37,7 @@ Para realizar a simulação foram geradas três cargas de trabalho, onde o núme
 
 Podemos verificar a igualdade da duração a partir dos boxplots abaixo:
 
-40 Processos             |  400 Processos | 4000 Processos
+40 Processos              |  400 Processos             | 4000 Processos
 :-------------------------:|:-------------------------:|:-------------------------:
 ![](plots/workload40.png) | ![](plots/workload400.png) | ![](plots/workload4000.png)
 
@@ -61,33 +61,43 @@ O plot separa as caixas de acordo com as quatro classes de prioridade existentes
 
 ##### Carga de Trabalho com 40 processos
 
-Round Robin             |  Priority Updating
-:-------------------------:|:-------------------------:
-![](plots/extra_time40_rr.png) | ![](plots/extra_time40_kr.png)
-
-Priority Random             |  Xv6 Priority Random
-:-------------------------:|:-------------------------:
-![](plots/extra_time40_pr.png) | ![](plots/extra_time40_xv6.png)
+Round Robin             |  Priority Updating | Priority Random             |  Xv6 Priority Random
+:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:
+![](plots/extra_time40_rr.png) | ![](plots/extra_time40_kr.png) | ![](plots/extra_time40_pr.png) | ![](plots/extra_time40_xv6.png)
 
 ##### Carga de Trabalho com 400 processos
 
-Round Robin             |  Priority Updating
-:-------------------------:|:-------------------------:
-![](plots/extra_time400_rr.png) | ![](plots/extra_time400_kr.png)
-
-Priority Random             |  Xv6 Priority Random
-:-------------------------:|:-------------------------:
-![](plots/extra_time400_pr.png) | ![](plots/extra_time400_xv6.png)
+Round Robin             |  Priority Updating | Priority Random             |  Xv6 Priority Random
+:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:
+![](plots/extra_time400_rr.png) | ![](plots/extra_time400_kr.png) | ![](plots/extra_time400_pr.png) | ![](plots/extra_time400_xv6.png)
 
 ##### Carga de Trabalho com 4000 processos
 
-Round Robin             |  Priority Updating
-:-------------------------:|:-------------------------:
-![](plots/extra_time400_rr.png) | ![](plots/extra_time400_kr.png)
+Round Robin             |  Priority Updating | Priority Random             |  Xv6 Priority Random
+:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:
+![](plots/extra_time400_rr.png) | ![](plots/extra_time400_kr.png) | ![](plots/extra_time400_pr.png) | ![](plots/extra_time400_xv6.png)
 
-Priority Random             |  Xv6 Priority Random
-:-------------------------:|:-------------------------:
-![](plots/extra_time400_pr.png) | ![](plots/extra_time400_xv6.png)
+Ao mesmo tempo, podemos observar ainda o impacto da carga sobre os algoritmos:
+
+#### Round Robin
+40 Processos              |  400 Processos             | 4000 Processos
+:-------------------------:|:-------------------------:|:-------------------------:
+![](plots/extra_time40_rr.png) | ![](plots/extra_time400_rr.png) | ![](plots/extra_time4000_rr.png)
+
+#### Priority Updating
+40 Processos              |  400 Processos             | 4000 Processos
+:-------------------------:|:-------------------------:|:-------------------------:
+![](plots/extra_time40_kr.png) | ![](plots/extra_time400_kr.png) | ![](plots/extra_time4000_kr.png)
+
+#### Priority Random
+40 Processos              |  400 Processos             | 4000 Processos
+:-------------------------:|:-------------------------:|:-------------------------:
+![](plots/extra_time40_pr.png) | ![](plots/extra_time400_pr.png) | ![](plots/extra_time4000_pr.png)
+
+#### Xv6 Priority Random
+40 Processos              |  400 Processos             | 4000 Processos
+:-------------------------:|:-------------------------:|:-------------------------:
+![](plots/extra_time40_xv6.png) | ![](plots/extra_time400_xv6.png) | ![](plots/extra_time4000_xv6.png)
 
 A partir dos gráficos, podemos avaliar que das quatro políticas analisadas cumpriram com seu requisito de justiça, bastando observar que no **Round Robin** as quatro caixas tem valores muito próximos e nos demais existe uma diferença de patamar conforme se varia a prioridade.
 
@@ -105,33 +115,43 @@ Utilizou-se de boxplot para observar o grau de variância dos valores correspond
 
 #### Carga de Trabalho com 40 processos
 
-Round Robin             |  Priority Updating
-:-------------------------:|:-------------------------:
-![](plots/wait_time40_rr.png) | ![](plots/wait_time40_kr.png)
-
-Priority Random             |  Xv6 Priority Random
-:-------------------------:|:-------------------------:
-![](plots/wait_time40_pr.png) | ![](plots/wait_time40_xv6.png)
+Round Robin             |  Priority Updating | Priority Random             |  Xv6 Priority Random
+:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:
+![](plots/wait_time40_rr.png) | ![](plots/wait_time40_kr.png) | ![](plots/wait_time40_pr.png) | ![](plots/wait_time40_xv6.png)
 
 #### Carga de Trabalho com 400 processos
 
-Round Robin             |  Priority Updating
-:-------------------------:|:-------------------------:
-![](plots/wait_time400_rr.png) | ![](plots/wait_time400_kr.png)
-
-Priority Random             |  Xv6 Priority Random
-:-------------------------:|:-------------------------:
-![](plots/wait_time400_pr.png) | ![](plots/wait_time400_xv6.png)
+Round Robin             |  Priority Updating | Priority Random             |  Xv6 Priority Random
+:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:
+![](plots/wait_time400_rr.png) | ![](plots/wait_time400_kr.png) | ![](plots/wait_time400_pr.png) | ![](plots/wait_time400_xv6.png)
 
 #### Carga de Trabalho com 4000 processos
 
-Round Robin             |  Priority Updating
-:-------------------------:|:-------------------------:
-![](plots/wait_time4000_rr.png) | ![](plots/wait_time4000_kr.png)
+Round Robin             |  Priority Updating | Priority Random             |  Xv6 Priority Random
+:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:
+![](plots/wait_time4000_rr.png) | ![](plots/wait_time4000_kr.png) | ![](plots/wait_time4000_pr.png) | ![](plots/wait_time4000_xv6.png)
 
-Priority Random             |  Xv6 Priority Random
-:-------------------------:|:-------------------------:
-![](plots/wait_time4000_pr.png) | ![](plots/wait_time4000_xv6.png)
+Podemos ainda visualizar os mesmos resultados considerando o impacto do aumento da carga nas políticas:
+
+#### Round Robin
+40 Processos              |  400 Processos             | 4000 Processos
+:-------------------------:|:-------------------------:|:-------------------------:
+![](plots/wait_time40_rr.png) | ![](plots/wait_time400_rr.png) | ![](plots/wait_time4000_rr.png)
+
+#### Priority Updating
+40 Processos              |  400 Processos             | 4000 Processos
+:-------------------------:|:-------------------------:|:-------------------------:
+![](plots/wait_time40_kr.png) | ![](plots/wait_time400_kr.png) | ![](plots/wait_time4000_kr.png)
+
+#### Priority Random
+40 Processos              |  400 Processos             | 4000 Processos
+:-------------------------:|:-------------------------:|:-------------------------:
+![](plots/wait_time40_pr.png) | ![](plots/wait_time400_pr.png) | ![](plots/wait_time4000_pr.png)
+
+#### Xv6 Priority Random
+40 Processos              |  400 Processos             | 4000 Processos
+:-------------------------:|:-------------------------:|:-------------------------:
+![](plots/wait_time40_xv6.png) | ![](plots/wait_time400_xv6.png) | ![](plots/wait_time4000_xv6.png)
 
 O primeiro compartamento interessante de se observar é que independente da quantidade de processos escalonados, o comportamento é o mesmo para todas as políticas, mesmo que os valores se modifiquem alterando a faixa.
 
