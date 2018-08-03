@@ -91,8 +91,7 @@ class NRU:
   def access(self, frameId, isWrite):
     # Put 1 on bitR (accessed), put 1 on bitM if modified (write)
     self.allocatedFrames[frameId][0] = 1
-    if (isWrite):
-      self.allocatedFrames[frameId][1] = 1
+    self.allocatedFrames[frameId][1] = 1 if isWrite else 0
 
   def _get_class(self, frame):
     # Get frame's class
@@ -178,7 +177,8 @@ class SECONDCHANCE:
     while (self.allocatedFrames[0][1] != 0):
       self.allocatedFrames[0][1] = 0
       self.allocatedFrames.append(self.allocatedFrames.pop(0))
-    return self.allocatedFrames.pop(0)[0]
+    frame = self.allocatedFrames.pop(0)
+    return frame[0]
 
   def clock(self):
     # DOUBT: When clock ticks, does the bitR get restarted?
