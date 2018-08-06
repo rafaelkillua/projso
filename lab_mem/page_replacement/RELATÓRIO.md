@@ -48,6 +48,7 @@ Pos | Workload 1 | Workload 2
 8  | 30813 -> 20440 (2.04%) | 293 -> 13100 (1.31%)
 9  | 28129 -> 18863 (1.89%) | 102591 -> 9912 (0.99%)
 10 | 15 -> 18343 (1.83%) | 301 -> 8539 (0.85%)
+
 *FrameID -> Quantidade de vezes referenciado (%)*
 
 ## Resultados
@@ -83,6 +84,7 @@ Pos | Expectativa | Resultado (workload 1) | Resultado (workload 2)
 2   | SECOND CHANCE | FIFO                 | AGING
 3   | NRU         | NRU                    | NRU
 4   | AGING       | AGING                  | FIFO
+
 *Resultados aproximados*
 
 ## Conclusão
