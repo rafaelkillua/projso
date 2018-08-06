@@ -26,29 +26,65 @@ Desta forma, necessário iniciar com uma apresentação dos conceitos de cada po
 
 5. **Aging** - O algoritmo **Aging** (envelhecimento) consiste em associar a cada página um contador de 8 bits, e a cada tick de clock, o contador é deslocado à direita e o valor do bit **R** é adcionado ao bit mais às esquerda do contador, ao invés do bit mais à direita. A página a ser removida é aquela que tem o menor contador, pois, se não for referenciada por um tempo, terá valores 0 nos bits mais signifcativos. Há duas diferenças do **Aging** para o **LRU**: se temos duas páginas a escolher para remover A, de contador 00100000, e B, de contador 00100100, que não foram referenciadas nos últimos 2 ticks de clock, o LRU removeria aleatoriamente entre A e B, e o Aging removeria A, pois tem contador menor; se duas páginas não foram referenciados há mais de 8 ticks de clock, fazendo o contador chegar a 00000000, o Aging não tem como verificar qual página foi referenciada há mais tempo e removeria aleatoriamente entre as duas, e o LRU teria essa informação. Este algoritmo é considerando por Tanebaum um dos melhores, sendo amplamente utilizado na prática.
 
-
 ## Workloads
 
-Para testar a eficiência dos algoritmos, dois workloads foram criados, ambos com 1 milhão de entradas compostos pelo ID do frame e o modo de operação (leitura ou escrita).
+Para testar a eficiência dos algoritmos, dois workloads foram criados, ambos com 1 milhão de entradas compostos pelo ID do frame a ser referenciado e o modo de operação (leitura ou escrita).
 
-**O primeiro workload** foi construído usando...
+**No primeiro workload** foram acessados 2852 frames diferentes, com 892816 leituras e 107184 escritas, e foi construído de uma maneira equilibrada, sem grande diferença de quantidade de acessos entre os frames.
 
-**Já o segundo workload** é um pouco diferente e...
+**Já no segundo workload** foram acessados 2543 frames diferentes, com 932830 leituras e 67170 escritas, e foi construído de uma maneira desequilibrada, com um frame (102567) sendo referenciado 47,40% das vezes.
+
+Os 10 frames mais acessados de cada workload são:
+
+Pos | Workload 1 | Workload 2
+---|------------|-----------
+1  | 195709 -> 103479 (10.35%) | 102567 -> 474010 (47.40%)
+2  | 158751 -> 94913 (9.49%) | 102575 -> 39115 (3.91%)
+3  | 194679 -> 77321 (7.73%) | 125679 -> 26047 (2.60%)
+4  | 198834 -> 57039 (5.70%) | 86550 -> 25913 (2.59%)
+5  | 251689 -> 38243 (3.82%) | 153356 -> 25831 (2.58%)
+6  | 201598 -> 30098 (3.01%) | 47 -> 17595 (1.76%)
+7  | 194932 -> 24218 (2.42%) | 15 -> 16883 (1.69%)
+8  | 30813 -> 20440 (2.04%) | 293 -> 13100 (1.31%)
+9  | 28129 -> 18863 (1.89%) | 102591 -> 9912 (0.99%)
+10 | 15 -> 18343 (1.83%) | 301 -> 8539 (0.85%)
+*FrameID -> Quantidade de vezes referenciado (%)*
 
 ## Resultados
 
-**Para o primeiro workload**, temos o seguinte gráfico resultante (Page Faults x Número de Frames):
+**Para o primeiro workload**, temos o seguinte gráfico resultante (Número de Frames x Page Faults):
 
 ![Gráfico 1](https://github.com/rafaelkillua/projso/blob/lab4/lab_mem/page_replacement/python/output/trace.1.mem.plot.png)
 
-Com isso, mostramos que, para esse workload, claramente o algoritmo AGING é o pior, independente da quantidade de frames utilizados. Em média, o segundo pior algoritmo é o NRU. Nessa situação, o melhor foi o SECOND CHANCE, e o segundo melhor foi o FIFO, contrariando um pouco o resultado esperado por nós. 
+Com isso, mostramos que, para esse workload equilibrado:
 
-**Já para o segundo workload** temos o seguinte gráfico resultante (Page Faults x Número de Frames):
+- O algoritmo **AGING** é o pior, independente da quantidade de frames utilizados.
+- Em média, o segundo pior é o **NRU**.
+- o segundo melhor foi o **FIFO**.
+- O melhor foi o **SECOND CHANCE**.
+
+**Já para o segundo workload** temos o seguinte gráfico resultante (Número de Frames x Page Faults):
 
 ![Gráfico 2](https://github.com/rafaelkillua/projso/blob/lab4/lab_mem/page_replacement/python/output/trace.2.mem.plot.png)
 
-Com isso, mostramos que, para esse workload, não temos um candidato absoluto a melhor ou pior algoritmo, pois depende mais do número de frames. Por exemplo, o algoritmo AGING é o melhor com 4, 8 ou 16 frames, mas com 32 frames é o pior. O mais equilibrado é o SECOND CHANCE, e o que mais sofre alteração com a mudança do número de frames utilizados é o NRU, que gera um page fault muito grande com poucos frames, mas com 32 frames é bem próximo ao SECOND CHANCE.
+Com isso, mostramos que, para esse workload desequlibrado:
+
+- Não temos um candidato absoluto a melhor ou pior algoritmo, pois depende do número de frames.
+- O **FIFO**, em média, é muito ruim nesse cenário, pois é o segundo pior com 4, 8 e 32 frames e o pior com 16 frames.
+- O que mais sofre alteração com a mudança do número de frames utilizados é o **NRU**, que gera um page fault muito grande com poucos frames, mas com 32 frames é bem próximo ao SECOND CHANCE.
+- O algoritmo **AGING** é o melhor com 8 ou 16 frames, com 4 frames é muito próximo ao SECOND CHANCE, mas com 32 frames é o pior.
+- O mais equilibrado é o **SECOND CHANCE**, que é o melhor com 4 e com 32 frames e com 8 e 16 frames é o segundo melhor.
+
+## Expectativas x Resultados
+
+Pos | Expectativa | Resultado (workload 1) | Resultado (workload 2)
+----|-------------|------------------------|-----------------------
+1   | FIFO        | SECOND CHANCE          | SECOND CHANCE
+2   | SECOND CHANCE | FIFO                 | AGING
+3   | NRU         | NRU                    | NRU
+4   | AGING       | AGING                  | FIFO
+*Resultados aproximados*
 
 ## Conclusão
 
-**Com isso, concluimos que** a eficiência dos algoritmos de reposição de páginas na memória depende de como foi construído o workload.
+**Com isso, concluimos que** a maneira como o workload foi construído afeta a eficiência dos algoritmos de reposição de páginas na memória, e, não levando em conta o algoritmo ótimo, não é possível chegar a uma conclusão exata de qual algoritmo dentre esses estudados e implementados é o melhor.
