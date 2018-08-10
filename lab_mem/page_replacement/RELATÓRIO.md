@@ -55,7 +55,7 @@ Pos | Workload 1 | Workload 2
 
 **Para o primeiro workload**, temos o seguinte gráfico resultante (Número de Frames x Page Faults):
 
-![Gráfico 1](https://github.com/rafaelkillua/projso/blob/lab4/lab_mem/page_replacement/python/output/trace.1.mem.plot.png)
+![Gráfico 1](https://github.com/rafaelkillua/projso/blob/master/lab_mem/page_replacement/python/output/trace.1.mem.plot.png)
 
 Com isso, mostramos que, para esse workload equilibrado:
 
@@ -66,7 +66,7 @@ Com isso, mostramos que, para esse workload equilibrado:
 
 **Já para o segundo workload** temos o seguinte gráfico resultante (Número de Frames x Page Faults):
 
-![Gráfico 2](https://github.com/rafaelkillua/projso/blob/lab4/lab_mem/page_replacement/python/output/trace.2.mem.plot.png)
+![Gráfico 2](https://github.com/rafaelkillua/projso/blob/master/lab_mem/page_replacement/python/output/trace.2.mem.plot.png)
 
 Com isso, mostramos que, para esse workload desequlibrado:
 
